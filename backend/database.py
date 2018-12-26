@@ -1,6 +1,14 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
+import logging
+from datetime import datetime
+from database import Session
+
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+
+__version__ = "0.1.0"
+
 engine = create_engine('sqlite:///database.sqlite3', echo=True)
 Base = declarative_base()
 
@@ -42,6 +50,21 @@ class Event_log(Base):
 	def __repr__(self):
 		return '<Event_log(id=%s, event_name=%s, )>' \
 			% (self.event_id, self.event_name)
+
+class SQLiteHandler(logging.Handler):
+    def __init__(self):
+        logging.Handler.__init__(self)
+        session = Session()
+        session.commit()
+        session.close()
+
+    def emit(self, record):
+        sql = 'insert into eventlogs (asctime, log_name, levelno, funcName, log_message, user_id, event_id, push, result) values (?,?,?,?,?,?,?,?,?)'
+        event = [datetime.now()] + record.msg.split(' ')
+        session = Session()
+        session.execute(sql, event)
+        session.commit()
+        session.close()
 
 if __name__ == '__main__':
 	Base.metadata.create_all(engine)

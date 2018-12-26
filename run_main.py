@@ -9,7 +9,7 @@ import sys
 import backend.app as backapp
 
 api = responder.API(debug=True, templates_dir='./dist', static_dir='./dist/static')
-logger = backapp.createLogger(__name__)
+logger = backapp.create_logger(__name__)
 
 #
 """
