@@ -16,6 +16,9 @@ def login(name, password):
     else:
         return 'too many users'
 
+def signin(name, password):
+    pass
+
 def add_users():
     session = Session()
     session.add(Users(

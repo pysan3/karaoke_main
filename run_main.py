@@ -5,14 +5,13 @@
 import responder
 import sqlite3
 import sys
+from random import randint
 
 import backend.app as backapp
 
 api = responder.API(debug=True, templates_dir='./dist', static_dir='./dist/static')
 logger = backapp.create_logger(__name__)
 
-#
-"""
 db_name = './database.sqlite3'
 
 def return_event_id(event_name):
@@ -31,7 +30,6 @@ def return_event_id(event_name):
             sys.exit()
         cur.execute('insert into event_log (event_name) values (?)', event_name)
     return fetch_all[0]
-"""
 
 def makeResult(features):
     if type(features[1]) is not int:
@@ -52,6 +50,14 @@ async def login(req, resp):
     isLogin = backapp.login(req.media())
     result = {'isLogin':isLogin}
     resp.media = result
+
+@api.route('/api/random')
+async def random_number():
+    result = {
+        'randomNumber': randint(1, 100)
+    }
+    resp.media = result
+
 
 if __name__ == '__main__':
     api.run()
