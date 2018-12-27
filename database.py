@@ -66,12 +66,17 @@ class SQLiteHandler(logging.Handler):
             record.push = ''
             record.result = ''
         else:
+            if '@_@' in record.msg:
+                message = record.msg[1:record.msg.index('@_@')]
+                record.msg = record.msg[record.msg.index('@_@')+2:]
+            else:
+                message = ''
             recs = record.msg[1:].split(' ')
             record.user_id = int(recs[0])
             record.event_id = int(recs[1])
             record.push = recs[2]
             record.result = recs[3]
-            record.msg = ''
+            record.msg = message
         return record
 
     def emit(self, record):

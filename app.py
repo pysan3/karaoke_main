@@ -11,7 +11,7 @@ def create_logger(filename):
     stream_handler.setLevel(logging.DEBUG)
     logger.addHandler(stream_handler)
     sqlite_handler = SQLiteHandler()
-    sqlite_handler.setLevel(logging.INFO)
+    sqlite_handler.setLevel(logging.DEBUG)
     logger.addHandler(sqlite_handler)
     logger.propagate = False
     return logger
@@ -20,6 +20,9 @@ def login(data):
     name = data['user_name']
     password = data['user_password']
     return server.login(name, password)
+
+def logged_in(data):
+    return {'result': 'true'}
 
 def check_database():
     server.add_users()
