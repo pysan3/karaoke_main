@@ -4,6 +4,7 @@
     <p>Random number from backend: {{ randomNumber }}</p>
     <button @click="getRandom">New random number</button>
     <router-link to="/about"><a>about</a></router-link>
+    <router-link to="/login"><a>login</a></router-link>
   </div>
 </template>
 
