@@ -4,7 +4,7 @@ from database import *
 
 def login(name, password):
     session = Session()
-    user = session.query(Users).filter(Users.user_name==name).all()
+    user = session.query(Users).filter_by(user_name=name).all()
     session.close()
     isFound = 0
     user_id = 0
@@ -19,9 +19,22 @@ def login(name, password):
         msg = 'no users'
     else:
         msg = 'too many users'
+    return {'isFound':isFound, 'user_id':user_id, 'msg':msg}
 
 def signin(name, password):
-    pass
+    session = Session()
+    user = session.query(Users).filter_by(user_name=name).one_or_none()
+    if user == None:
+        session.query(Users).add(Users(user_name=name, user_password=password))
+        session.commit()
+        succeed = 1
+        user_id = session.query(Users).filter_by(user_name=name).one().id
+        msg = 'succeed create user account'
+    else:
+        succeed = 0
+        user_id = 0
+        msg = 'already exists'
+    return {'succeed':succeed, 'user_id':user_id, 'msg':msg}
 
 def add_users():
     session = Session()

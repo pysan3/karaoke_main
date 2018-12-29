@@ -21,6 +21,11 @@ def login(data):
     password = data['user_password']
     return server.login(name, password)
 
+def signin(data):
+    name = data['user_name']
+    password = data['user_password']
+    return server.signin(name, password)
+
 def logged_in(data):
     return {'result': 'true'}
 

@@ -22,11 +22,11 @@ async def login(req, resp):
     if result['isFound'] == 1:
         logger.info('@{0} {1} {2} {3}'.format(result['user_id'], 2, user['user_name'], result['result']))
     else:
-        logger.warning('@{0} {1} {2} {3} {4}'.format('no user exists@_@', result['user_id'], 2, user['user_name'], result['result']))
-    return result
+        logger.warning('no user exists@_@{0} {1} {2} {3}'.format(result['user_id'], 2, user['user_name'], result['result']))
+    resp.media = result
 
 @api.route('/api/loggedin')
-async def loggedin(req, resq):
+async def loggedin(req, resp):
     user = req.media()
     # {'user_name': 'hoge'}
     isLogged_in = backapp.logged_in(user)
@@ -34,8 +34,16 @@ async def loggedin(req, resq):
     if isLogged_in['isFound'] == 'true':
         logger.info('@{0} {1} {2} {3}'.format(isLogged_in['user_id'], 2, user['user_name'], isLogged_in['result']))
     else:
-        logger.warning('@{0} {1} {2} {3} {4}'.format('no user exists@_@', isLogged_in['user_id'], 2, user['user_name'], isLogged_in['result']))
-    return isLogged_in
+        logger.warning('no user exists@_@{0} {1} {2} {3}'.format(isLogged_in['user_id'], 2, user['user_name'], isLogged_in['result']))
+    resp.media = isLogged_in
+
+@api.route('/api/signin')
+async def signin(req, resp):
+    user = req.media()
+    # {'user_name': 'hoge', 'user_password': 'fuga'}
+    result = backapp.signin(user)
+    logger.info('{0}@_@{1} {2} {3}'.format(result['msg'], result['user_id'], user['user_name'], result['succeed']))
+    resp.media = result
 
 @api.route('/api/random')
 def random_number(req, resp):
