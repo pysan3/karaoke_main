@@ -64,6 +64,8 @@ class SQLiteHandler(logging.Handler):
             i = record.msg.index('@_@')
             message = record.msg[:i]
             record.msg = record.msg[i+2:]
+        else:
+            message = record.msg
         if record.msg[0] != '@':
             record.user_id = 0
             record.event_id = 0
@@ -75,7 +77,7 @@ class SQLiteHandler(logging.Handler):
             record.event_id = int(recs[1])
             record.push = recs[2]
             record.result = recs[3]
-            record.msg = message
+        record.msg = message
         return record
 
     def emit(self, record):

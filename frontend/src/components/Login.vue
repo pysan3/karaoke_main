@@ -1,73 +1,47 @@
 <template>
-    <div>
-        <p>LOGIN</p>
-        <!-- hogehoge -->
-    </div>
+  <div>
+    <p>LOGIN</p>
+    <p>login succeeded {{ isLogin }}</p>
+    <p>login user_id {{ user_id }}</p>
+    <p>login result {{ result }}</p>
+    <!-- hogehoge -->
+  </div>
 </template>
 
 <script>
-import vue from 'vue'
-import axios from 'axios'
-import vueaxios from 'vue-axios'
-
-export default {
-    user () {
-        return {
-            user_name: 'hogehoge',
-            user_password: 'hogehoge',
-        }
-    },
-    result () {
-        return {
-            user_found: 0,
-            user_id: 0,
-            result: 0}
-    }
-    methods: {
-        tryLogin () {
-            const path = 'http://localhost:5042/api/login'
-            axios.post(path, user)
-            .then(response => {
-                this.isLogin = response.result.isLogin
-            })
-            .catch(error => {
-                console.log(error)
-            })
-        }
-    },
-    created () {
-        this.tryLogin()
-    }
-}
-
-vue.use(vue-axios, axios)
-
-var token = 'csrf_token here'
-const path = 'http://localhost:5042/api/login'
-
-axios.post('')
-
 import axios from 'axios'
 export default {
-  data () {
+  user () {
     return {
-      randomNumber: 0
+      user_name: 'master',
+      user_password: '000'
+    }
+  },
+  result () {
+    return {
+      isFound: 0,
+      user_id: 0,
+      result: 0
     }
   },
   methods: {
-    getRandom () {
-      const path = 'http://localhost:5042/api/random'
-      axios.get(path)
-      .then(response => {
-        this.randomNumber = response.data.randomNumber
+    tryLogin () {
+      axios.post('http://localhost:5042/api/login', {
+        article: { user_name: 'master', user_password: '000' },
+        csrf_token: 'csrf-token here'
       })
-      .catch(error => {
-        console.log(error)
-      })
+        .then(response => {
+          this.isLogin = response.result.isLogin
+          this.user_id = response.result.user_id
+          this.result = response.result.result
+        })
+        .catch(error => {
+          console.log(error)
+        })
     }
   },
   created () {
-    this.getRandom()
+    this.tryLogin()
   }
 }
 </script>

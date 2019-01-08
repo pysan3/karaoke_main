@@ -4,7 +4,7 @@
     <p>Random number from backend: {{ randomNumber }}</p>
     <button @click="getRandom">New random number</button>
     <router-link to="/about"><a>about</a></router-link>
-    <router-link to="/login"><a>login</a></router-link>
+    <router-link to="/api/login"><a>login</a></router-link>
   </div>
 </template>
 
@@ -20,12 +20,12 @@ export default {
     getRandom () {
       const path = 'http://localhost:5042/api/random'
       axios.get(path)
-      .then(response => {
-        this.randomNumber = response.data.randomNumber
-      })
-      .catch(error => {
-        console.log(error)
-      })
+        .then(response => {
+          this.randomNumber = response.data.randomNumber
+        })
+        .catch(error => {
+          console.log(error)
+        })
     }
   },
   created () {
