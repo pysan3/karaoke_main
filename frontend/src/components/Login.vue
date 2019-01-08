@@ -1,7 +1,7 @@
 <template>
   <div>
     <p>LOGIN</p>
-    <p>login succeeded {{ isLogin }}</p>
+    <p>login succeeded {{ isFound }}</p>
     <p>login user_id {{ user_id }}</p>
     <p>login result {{ result }}</p>
     <!-- hogehoge -->
@@ -17,7 +17,7 @@ export default {
       user_password: '000'
     }
   },
-  result () {
+  data () {
     return {
       isFound: 0,
       user_id: 0,
@@ -27,13 +27,13 @@ export default {
   methods: {
     tryLogin () {
       axios.post('http://localhost:5042/api/login', {
-        article: { user_name: 'master', user_password: '000' },
-        csrf_token: 'csrf-token here'
+        user_name: 'master',
+        user_password: '000'
       })
         .then(response => {
-          this.isLogin = response.result.isLogin
-          this.user_id = response.result.user_id
-          this.result = response.result.result
+          this.isFound = response.data.isFound
+          this.user_id = response.data.user_id
+          this.result = response.data.result
         })
         .catch(error => {
           console.log(error)
