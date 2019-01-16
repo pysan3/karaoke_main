@@ -30,7 +30,7 @@ def logged_in(data):
     return {'result': 'true'}
 
 def check_database():
-    server.add_users()
+    server.add_users('takuto', '000')
     user_dataset = server.return_users()
     for user in user_dataset:
         print(user.id, user.user_name, user.user_password, user.created_at)

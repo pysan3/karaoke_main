@@ -14,6 +14,7 @@ def login(name, password):
         if user[0].user_password == password:
             user_id = user[0].id
             isFound = 1
+            msg = 'success'
         else:
             msg = 'wrong password'
     elif len(user) == 0:
@@ -26,9 +27,9 @@ def login(name, password):
 def signin(name, password):
     session = Session()
     user = session.query(Users).filter_by(user_name=name).one_or_none()
+    session.close()
     if user == None:
-        session.query(Users).add(Users(user_name=name, user_password=password))
-        session.commit()
+        add_users(name, password)
         succeed = 1
         user_id = session.query(Users).filter_by(user_name=name).one().id
         msg = 'succeed create user account'
@@ -39,11 +40,11 @@ def signin(name, password):
     return {'succeed': succeed, 'user_id': user_id, 'msg': msg}
 
 
-def add_users():
+def add_users(name, password):
     session = Session()
     session.add(Users(
-        user_name='Takuto',
-        user_password='000',
+        user_name=name,
+        user_password=password,
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.commit()

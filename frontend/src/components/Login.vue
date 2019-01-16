@@ -14,7 +14,7 @@ export default {
   user () {
     return {
       user_name: 'master',
-      user_password: '000'
+      user_password: 'hogehoge'
     }
   },
   data () {
@@ -26,14 +26,14 @@ export default {
   },
   methods: {
     tryLogin () {
-      axios.post('http://localhost:5042/api/login', {
-        user_name: 'master',
+      axios.post('http://localhost:5042/api/signin', {
+        user_name: 'takuto',
         user_password: '000'
       })
         .then(response => {
-          this.isFound = response.data.isFound
+          this.isFound = response.data.succeed
           this.user_id = response.data.user_id
-          this.result = response.data.result
+          this.result = response.data.msg
         })
         .catch(error => {
           console.log(error)

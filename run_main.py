@@ -19,20 +19,18 @@ async def index(req, resp):
 @api.route('/api/login')
 async def login(req, resp):
     user = await req.media()
-
-    print(type(user))
-
+    # {'user_name': 'hoge', 'user_password': 'fuga'}
     print(user)
-    # {'user_name': 'hoge'}
     result = backapp.login(user)
     # {'isFound': 1 / 0, 'user_id': number, 'result': 1 / 0}
+    print(result)
     if result['isFound'] == 1:
         logger.info('@{0} {1} {2} {3}'.format(
             result['user_id'], 2, user['user_name'], result['msg']))
     else:
         logger.warning('no user exists@_@{0} {1} {2} {3}'.format(
             result['user_id'], 2, user['user_name'], result['msg']))
-    result = {'isFound': 1, 'user_id': 100, 'result': 1}
+    # result = {'isFound': 1, 'user_id': 100, 'result': 1}
     resp.media = result
 
 
@@ -53,12 +51,13 @@ async def loggedin(req, resp):
 
 @api.route('/api/signin')
 async def signin(req, resp):
-    user = req.media()
+    user = await req.media()
     # {'user_name': 'hoge', 'user_password': 'fuga'}
+    print(user)
     result = backapp.signin(user)
     # {'succeed':succeed, 'user_id':user_id, 'msg':msg}
-    logger.info('{0}@_@{1} {2} {3}'.format(
-        result['msg'], result['user_id'], user['user_name'], result['succeed']))
+    logger.info('{0}@_@{1} {2} {3} {4}'.format(
+        result['msg'], result['user_id'], 3, user['user_name'], result['succeed']))
     resp.media = result
 
 
