@@ -1,11 +1,10 @@
 <template>
   <div>
-    <p>LOGIN</p>
-    <p>login succeeded {{ isFound }}</p>
-    <p>login user_id {{ user_id }}</p>
+    <p>SIGNIN</p>
+    <p>signin succeeded {{ succeed }}</p>
+    <p>signin user_id {{ user_id }}</p>
     <p>signin user_name {{ user_name }}</p>
-    <p>login result {{ result }}</p>
-    <!-- hogehoge -->
+    <p>signin result {{ msg }}</p>
   </div>
 </template>
 
@@ -14,23 +13,23 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      user_name: 'master',
-      user_password: 'hogehoge',
-      isFound: 0,
+      user_name: 'takuto',
+      user_password: '000',
+      succeed: 0,
       user_id: 0,
-      result: 0
+      msg: 0
     }
   },
   methods: {
-    tryLogin () {
-      axios.post('http://localhost:5042/api/login', {
+    trySignin () {
+      axios.post('http://localhost:5042/api/signin', {
         user_name: 'takuto',
         user_password: '000'
       })
         .then(response => {
-          this.isFound = response.data.isFound
+          this.succeed = response.data.succeed
           this.user_id = response.data.user_id
-          this.result = response.data.result
+          this.msg = response.data.msg
         })
         .catch(error => {
           console.log(error)
@@ -38,7 +37,7 @@ export default {
     }
   },
   created () {
-    this.tryLogin()
+    this.trySignin()
   }
 }
 </script>

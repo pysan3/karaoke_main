@@ -5,6 +5,7 @@
     <button @click="getRandom">New random number</button>
     <router-link to="/about"><a>about</a></router-link>
     <router-link to="/api/login"><a>login</a></router-link>
+    <router-link to="/api/signin"><a>signin</a></router-link>
   </div>
 </template>
 
