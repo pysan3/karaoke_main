@@ -64,7 +64,7 @@ li {
 a {
   color: #42b983;
 }
-.login {
+.signup {
   margin-top: 20px;
 
   display: flex;
