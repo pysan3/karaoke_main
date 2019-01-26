@@ -16,18 +16,22 @@ def create_logger(filename):
     logger.propagate = False
     return logger
 
+def create_eventnames(funcs):
+    server.eventnames(funcs)
+    print('DONE: init db')
+
 def login(data):
     name = data['user_name']
     password = data['user_password']
     return server.login(name, password)
 
-def signin(data):
+def signup(data):
     name = data['user_name']
     password = data['user_password']
-    return server.signin(name, password)
+    return server.signup(name, password)
 
 def logged_in(data):
-    return {'result': 'true'}
+    return {'result': 0}
 
 def check_database():
     server.add_users('takuto', '000')

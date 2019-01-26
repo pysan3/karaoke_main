@@ -1,17 +1,17 @@
 <template>
-  <div class="login">
-    <p>LOGIN</p>
-    <h2>log in</h2>
+  <div class="signup">
+    <p>SIGNUP</p>
+    <h2>Sign up</h2>
     <input type="text" placeholder="Username" v-model="user_name">
     <input type="password" placeholder="Password" v-model="user_password">
-    <button @click="tryLogin">Register</button>
+    <button @click="trySignup">Register</button>
     <p>Do you have an account?
-      <router-link to="/api/signup">sign up now!!</router-link>
+      <router-link to="/api/login">log in now!!</router-link>
     </p>
-    <p>login succeeded {{ isFound }}</p>
-    <p>login user_id {{ user_id }}</p>
-    <p>signin user_name {{ user_name }}</p>
-    <!-- hogehoge -->
+    <p>signup succeeded {{ succeed }}</p>
+    <p>signup user_id {{ user_id }}</p>
+    <p>signup user_name {{ user_name }}</p>
+    <p>signup result {{ msg }}</p>
   </div>
 </template>
 
@@ -22,19 +22,21 @@ export default {
     return {
       user_name: '',
       user_password: '',
-      isFound: 0,
-      user_id: 0
+      succeed: 0,
+      user_id: 0,
+      msg: 0
     }
   },
   methods: {
-    tryLogin () {
-      axios.post('http://localhost:5042/api/login', {
+    trySignup () {
+      axios.post('http://localhost:5042/api/signup', {
         user_name: this.user_name,
         user_password: this.user_password
       })
         .then(response => {
-          this.isFound = response.data.isFound
+          this.succeed = response.data.succeed
           this.user_id = response.data.user_id
+          this.msg = response.data.msg
         })
         .catch(error => {
           console.log(error)
@@ -42,7 +44,7 @@ export default {
     }
   },
   created () {
-    this.tryLogin()
+    this.trySignup()
   }
 }
 </script>

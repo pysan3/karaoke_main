@@ -6,8 +6,8 @@ cur = conn.cursor()
 for name in res:
     result = cur.execute("select * from {0}".format(name[0])).fetchall()
     for des in cur.description:
-        print(des[0])
-    print('----------results :')
+        print(des[0] + '  ', end='')
+    print('\n----------results :')
     for x in result:
         print(x)
     print('done\n')

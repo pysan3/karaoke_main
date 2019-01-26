@@ -20,16 +20,15 @@ class Eventlogs(Base):
 	asctime = Column('asctime', String)
 	log_name = Column('log_name', String)
 	levelno = Column('levelno', Integer)
-	funcname = Column('funcname', String)
-	log_message = Column('log_message', String)
 	user_id = Column('user_id', Integer)
 	event_id = Column('event_id', Integer)
 	push = Column('push', String)
 	result = Column('result', String)
+	log_message = Column('log_message', String)
 
 	def __repr__(self):
-		return '<Eventlogs(id=%s, asctime=%s, log_name=%s, levelno=%s, funcname=%s, log_message=%s, user_id=%s, event_id=%s, push=%s, result=%s, )>' \
-			% (self.log_id, self.asctime, self.log_name, self.levelno, self.funcname, self.log_message, self.user_id, self.event_id, self.push, self.result)
+		return '<Eventlogs(id=%s, asctime=%s, log_name=%s, levelno=%s, user_id=%s, event_id=%s, push=%s, result=%s, log_message=%s)>' \
+			% (self.log_id, self.asctime, self.log_name, self.levelno, self.user_id, self.event_id, self.push, self.result, self.log_message)
 
 class Users(Base):
 	__tablename__ = 'users'
@@ -42,13 +41,13 @@ class Users(Base):
 		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, )>' \
 			% (self.user_id, self.user_name, self.user_password, self.created_at)
 
-class Event_log(Base):
-	__tablename__ = 'event_log'
+class Eventnames(Base):
+	__tablename__ = 'eventnames'
 	id = Column('id', Integer, primary_key=True)
 	event_name = Column('event_name', String)
 
 	def __repr__(self):
-		return '<Event_log(id=%s, event_name=%s, )>' \
+		return '<Eventnames(id=%s, event_name=%s, )>' \
 			% (self.event_id, self.event_name)
 
 class SQLiteHandler(logging.Handler):
@@ -81,7 +80,8 @@ class SQLiteHandler(logging.Handler):
         return record
 
     def emit(self, record):
-        sql = "INSERT INTO eventlogs (asctime, log_name, levelno, funcname, log_message, user_id, event_id, push, result) VALUES ('%(asctime)s', '%(name)s', '%(levelno)s', '%(funcName)s', '%(msg)s', '%(user_id)s', '%(event_id)s', '%(push)s', '%(result)s')"
+        sql = "INSERT INTO eventlogs (asctime, log_name, levelno, log_message, user_id, event_id, push, result) VALUES\
+         ('%(asctime)s', '%(name)s', '%(levelno)s', '%(msg)s', '%(user_id)s', '%(event_id)s', '%(push)s', '%(result)s')"
         record = self._rec(record)
         session = Session()
         session.execute(sql % record.__dict__)
@@ -95,8 +95,8 @@ if __name__ == '__main__':
     session.add(Users(
         id=0,
         user_name='master',
-        user_password='hogehoge',
-        created_at=0,
+        user_password='password',
+        created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.commit()
     session.close()
