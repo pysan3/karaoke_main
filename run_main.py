@@ -35,7 +35,6 @@ async def login(req, resp):
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
         result['msg'], f_index, result['user_id'], user['user_name'], result['isFound']
     ))
-    result.pop('msg')
     resp.media = result
 
 @api.route('/api/loggedin')

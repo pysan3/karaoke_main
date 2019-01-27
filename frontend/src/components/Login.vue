@@ -10,7 +10,8 @@
     </p>
     <p>login succeeded {{ isFound }}</p>
     <p>login user_id {{ user_id }}</p>
-    <p>signin user_name {{ user_name }}</p>
+    <p>login user_name {{ user_name }}</p>
+    <p>login msg {{ msg }}</p>
     <!-- hogehoge -->
   </div>
 </template>
@@ -23,7 +24,8 @@ export default {
       user_name: '',
       user_password: '',
       isFound: 0,
-      user_id: 0
+      user_id: 0,
+      msg: ''
     }
   },
   methods: {
@@ -35,6 +37,7 @@ export default {
         .then(response => {
           this.isFound = response.data.isFound
           this.user_id = response.data.user_id
+          this.msg = response.data.msg
         })
         .catch(error => {
           console.log(error)
