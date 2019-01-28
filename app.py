@@ -1,3 +1,5 @@
+import numpy as np
+import wave
 import logging
 import server
 from database import SQLiteHandler
@@ -39,8 +41,23 @@ def music_list():
 def add_music(name, singer):
     return server.addMusic(name, singer)
 
-def upload_music(data):
-    print(data)
+class WebSocketHandler:
+    def __init__(self):
+        self.data = []
+        print('ready for websocket')
+    def upload(self, data):
+        self.data.append(np.frombuffer(data, dtype='float32'))
+    def close(self, path):
+        v = np.array(self.data)
+        v.flatten()
+        arr = (v * 32767).astype(np.int16)
+        with wave.Wave_write(path) as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(48000)
+            wf.writeframes(arr.tobytes('C'))
+        self.data.clear()
+        print('closed websocket')
 
 def check_database():
     server.add_users('takuto', '000')
