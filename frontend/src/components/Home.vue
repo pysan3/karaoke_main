@@ -6,6 +6,7 @@
     <router-link to="/about"><a>about</a></router-link>
     <router-link to="/api/login"><a>login</a></router-link>
     <router-link to="/api/signup"><a>signup</a></router-link>
+    <router-link to="/api/musiclist"><a>musiclist</a></router-link>
   </div>
 </template>
 

@@ -33,6 +33,15 @@ def signup(data):
 def logged_in(data):
     return {'result': 0}
 
+def music_list():
+    return server.music_list()
+
+def add_music(name, singer):
+    return server.addMusic(name, singer)
+
+def upload_music(data):
+    print(data)
+
 def check_database():
     server.add_users('takuto', '000')
     user_dataset = server.return_users()

@@ -3,6 +3,7 @@ import sqlite3
 import sys
 import json
 from random import randint
+import time
 
 import app as backapp
 
@@ -16,8 +17,16 @@ functions = [
     'loggedin',
     'login',
     'signup',
+    'musiclist',
+    'upload',
 ]
 backapp.create_eventnames(functions)
+result = [
+    {'id':1, 'name':'hoge'},
+    {'id':2, 'name':'fuga'},
+    {'id':3, 'name':'hogefuga'},
+    {'id':4, 'name':'foobar'},
+]
 
 @api.route('/')
 async def index(req, resp):
@@ -60,6 +69,33 @@ async def signup(req, resp):
         result['msg'], f_index, result['user_id'], user['user_name'], result['succeed']
     ))
     resp.media = result
+
+@api.route('/api/musiclist')
+async def musiclist(req, resp):
+    f_index = functions.index(sys._getframe().f_code.co_name)
+    user_id = await req.media()
+    result = backapp.music_list()
+    # {'id':number, 'name':'song_name', 'singer':'singer_name'}
+    logger.info('{0}@_@{1} {2} {3} {4}'.format(
+        'success', f_index, user_id['user_id'], '', 'list of musics'
+    ))
+    resp.media = result
+
+@api.route('/api/upload')
+async def upload(req, resp):
+    f_index = functions.index(sys._getframe().f_code.co_name)
+    @api.background.task
+    def upload_music(data):
+        backapp.upload_music(data)
+        time.sleep(3)
+        print('finish')
+    song = await req.media()
+    result = backapp.add_music(song['song_name'], song['singer'])
+    logger.info('{0}@_@{1} {2} {3} {4}'.format(
+        'music upload', f_index, song['user_id'], song['song_name'], '1'
+    ))
+    upload_music(song['music'])
+    resp.media = {'success':result}
 
 @api.route('/api/random')
 def random_number(req, resp):

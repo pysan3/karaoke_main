@@ -7,6 +7,8 @@ const routerOptions = [
   { path: '/helloworld', component: 'HelloWorld' },
   { path: '/api/login', component: 'Login' },
   { path: '/api/signup', component: 'Signup' },
+  { path: '/api/musiclist', component: 'MusicList' },
+  { path: '/api/musicupload', component: 'Upload' },
   { path: '*', component: 'NotFound' }
 ]
 

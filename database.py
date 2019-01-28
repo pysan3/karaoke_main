@@ -27,8 +27,17 @@ class Eventlogs(Base):
 	log_message = Column('log_message', String)
 
 	def __repr__(self):
-		return '<Eventlogs(id=%s, asctime=%s, log_name=%s, levelno=%s, user_id=%s, event_id=%s, push=%s, result=%s, log_message=%s)>' \
-			% (self.log_id, self.asctime, self.log_name, self.levelno, self.user_id, self.event_id, self.push, self.result, self.log_message)
+		return '<Eventlogs(id=%s, asctime=%s, log_name=%s, levelno=%s, user_id=%s, event_id=%s, push=%s, result=%s, log_message=%s, )>' \
+			% (self.id, self.asctime, self.log_name, self.levelno, self.user_id, self.event_id, self.push, self.result, self.log_message)
+
+class Eventnames(Base):
+	__tablename__ = 'eventnames'
+	id = Column('id', Integer, primary_key=True)
+	event_name = Column('event_name', String)
+
+	def __repr__(self):
+		return '<Eventnames(id=%s, event_name=%s, )>' \
+			% (self.id, self.event_name)
 
 class Users(Base):
 	__tablename__ = 'users'
@@ -39,16 +48,18 @@ class Users(Base):
 
 	def __repr__(self):
 		return '<Users(id=%s, user_name=%s, user_password=%s, created_at=%s, )>' \
-			% (self.user_id, self.user_name, self.user_password, self.created_at)
+			% (self.id, self.user_name, self.user_password, self.created_at)
 
-class Eventnames(Base):
-	__tablename__ = 'eventnames'
-	id = Column('id', Integer, primary_key=True)
-	event_name = Column('event_name', String)
+class Musics(Base):
+    __tablename__ = 'musics'
+    id = Column('id', Integer, primary_key=True)
+    song_name = Column('song_name', String)
+    singer = Column('singer', String)
+    created_at = Column('created_at', String)
 
-	def __repr__(self):
-		return '<Eventnames(id=%s, event_name=%s, )>' \
-			% (self.event_id, self.event_name)
+    def __repr__(self):
+        return '<Musics(id=%s, song_name=%s, singer=%s, created_at=%s, )>' \
+            % (self.id, self.song_name, self.singer, self.created_at)
 
 class SQLiteHandler(logging.Handler):
     def __init__(self):
@@ -93,9 +104,13 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
     session = Session()
     session.add(Users(
-        id=0,
         user_name='master',
         user_password='password',
+        created_at=datetime.now().isoformat(' ', 'seconds'),
+    ))
+    session.add(Musics(
+        song_name='wonder stella',
+        singer='fhana',
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.commit()

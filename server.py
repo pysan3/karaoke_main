@@ -48,6 +48,26 @@ def signup(name, password):
         msg = 'already exists'
     return {'succeed': succeed, 'user_id': user_id, 'msg': msg}
 
+def music_list():
+    session = Session()
+    songs = session.query(Musics).all()
+    result = []
+    for song in songs:
+        result.append({'id':song.id, 'name':song.song_name, 'singer':song.singer})
+    return result
+
+def addMusic(name, singer):
+    session = Session()
+    session.add(Musics(
+        song_name=name,
+        singer=singer,
+        created_at=datetime.now().isoformat(' ', 'seconds'),
+    ))
+    session.commit()
+    song = session.query(Musics).filter_by(song_name=name, singer=singer).all()
+    session.close()
+    return song[0].id if len(song) == 1 else -1
+
 def add_users(name, password):
     session = Session()
     session.add(Users(
