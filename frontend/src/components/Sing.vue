@@ -2,9 +2,9 @@
   <div id="app">
   <!-- <div v-if="!music"> -->
     <h2>Select an music</h2>
-    <input type="file" accept="audio/*" capture="microphone" id="recorder">
+    <input type="file" accept="audio/*" capture="microphone" id="recorder" @click="onFileChange">
     <audio id="player" controls></audio>
-    <button @click="onFileChange">preview</button>
+    <div id="byte_content"></div>
   <!-- </div>
   <div v-else> -->
     <h2>data of music</h2>
@@ -12,9 +12,7 @@
     <input type="text" placeholder="music name" v-model="song_name">
     <h3>singer name</h3>
     <input type="text" placeholder="name of singer" v-model="singer">
-    <button @click="upload">upload music</button>
-    <button @click="removeImage">Remove music</button>
-    <h1>{{ music }}</h1>
+    <button id="btn" @click="upload">upload music</button>
   <!-- </div> -->
   </div>
 </template>
@@ -25,46 +23,57 @@ export default {
     return {
       user_id: 100,
       song_name: '',
-      singer: '',
-      resp: 0,
-      file: new MediaStream()
+      singer: ''
     }
   },
   methods: {
     onFileChange () {
       var recorder = document.getElementById('recorder')
       var player = document.getElementById('player')
-      var vm = this
       recorder.addEventListener('change', function (e) {
-        vm.file = e.target.files[0]
-        player.src = URL.createObjectURL(vm.file)
+        player.src = URL.createObjectURL(e.target.files[0])
       })
     },
     upload () {
-      console.log(this.file)
-      var context = new AudioContext()
-      var input = context.createMediaStreamSource(this.file)
-      var processor = context.createScriptProcessor(1024, 1, 1)
-
-      var connection = new WebSocket('http://localhost:5024:ws/upload')
-      input.connect(processor)
-      processor.connect(context.destination)
-      processor.onaudioprocess = function (e) {
-        var voice = e.inputBuffer.getChannelData(0)
-        var data = {
-          user_id: this.user_id,
-          song_name: this.song_name,
-          singer: this.singer,
-          music: voice.buffer
+      var file = document.getElementById('recorder').files[0]
+      var vm = this
+      var counter = 0
+      var chunkSIZE = 1024
+      var connection = new WebSocket('ws://localhost:8000/websocket')
+      connection.onmessage = function (event) {
+        var result = JSON.parse(event.data).success
+        if (result === -1) {
+          document.location = '/#/api/musicupload'
+        } else if (result === parseInt(file.size / chunkSIZE)) {
+          connection.close()
+          document.location = '/#/api/musiclist'
         }
-        connection.send(JSON.stringify(data))
       }
-      if (this.resp !== -1) {
-        document.location = '/'
+      for (var start = 0; start < file.size; start += chunkSIZE) {
+        var stop = Math.min(start + chunkSIZE, file.size)
+        var reader = new FileReader()
+        reader.onloadend = function (evt) {
+          var numArr = new Uint8Array(evt.target.result)
+          var charList = ''
+          ++counter
+          for (var j = 0; j < numArr.length; ++j) {
+            // check if right digit
+            charList += numArr[j]
+          }
+          if (evt.target.readyState === FileReader.DONE) {
+            var data = {
+              loaded_data: counter,
+              user_id: vm.user_id,
+              song_name: vm.song_name,
+              singer: vm.singer,
+              music: charList
+            }
+            connection.send(JSON.stringify(data))
+          }
+        }
+        var blob = file.slice(start, stop)
+        reader.readAsArrayBuffer(blob)
       }
-    },
-    removeImage: function (e) {
-      this.music = ''
     }
   }
 }

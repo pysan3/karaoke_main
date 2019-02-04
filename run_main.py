@@ -4,10 +4,12 @@ import sys
 import json
 from random import randint
 import time
+from requests_toolbelt.multipart	 import decoder
 
 import app as backapp
 
 api = responder.API(templates_dir='./dist', static_dir='./dist/static')
+api.add_route(websocket=True)
 logger = backapp.create_logger(__name__)
 # logger.info(msg@_@event_id, user_id, push, result)
 
@@ -18,9 +20,9 @@ functions = [
     'login',
     'signup',
     'musiclist',
+    'upload',
     'ws_upload',
 ]
-backapp.create_eventnames(functions)
 
 @api.route('/')
 async def index(req, resp):
@@ -75,32 +77,43 @@ async def musiclist(req, resp):
     ))
     resp.media = result
 
-# @api.route('/api/upload')
-# async def upload(req, resp):
+@api.route('/api/upload')
+async def upload(req, resp):
+    # f_index = functions.index(sys._getframe().f_code.co_name)
+    print('function triggered')
+    song = await req.media()
+    print('await finished')
+    song = decoder.MultipartDecoder.from_response(song)
+    print(song)
+    # {'user_id':number, 'song_name':name, 'singer':singer, 'music':data}
+    # print('sent data:', song)
+    # result = backapp.add_music(song['song_name'], song['singer'])
+    # backapp.music_data(song['music'])
+    # logger.info('{0}@_@{1} {2} {3} {4}'.format(
+    #     'music upload', f_index, song['user_id'], song['song_name'], result
+    # ))
+    # print(result)
+    result = 100
+    resp.media = {'success':result}
+
+# def ws_upload(client, server, message):
 #     f_index = functions.index(sys._getframe().f_code.co_name)
-#     song = await req.media()
-#     # {'user_id':number, 'song_name':name, 'singer':singer}
-#     print('sent data:', song)
-#     result = backapp.add_music(song['song_name'], song['singer'])
+#     ws_audio = backapp.WebSocketHandler()
+#     song = json.loads(message)
+#     print(client, server, song)
+#     ws_audio.upload(song['music'])
+#     # await ws.accept()
+#     # while True:
+#     #     song = await ws.receive_json()
+#     #     # {'user_id':number, 'song_name':name, 'singer':singer, 'music':data}
+#     #     if song != {}:
+#     #         ws_audio.upload(song['music'])
+#     #     song = {}
+#     #     await ws.send_json({'success':1})
 #     logger.info('{0}@_@{1} {2} {3} {4}'.format(
 #         'music upload', f_index, song['user_id'], song['song_name'], '1'
 #     ))
-#     resp.media = {'success':result}
-
-@api.route('/ws/upload')
-async def ws_upload(ws):
-    f_index = functions.index(sys._getframe().f_code.co_name)
-    ws_audio = backapp.WebSocketHandler()
-    await ws.accept()
-    while True:
-        song = await ws.receive_json()
-        ws_audio.upload(song)
-    await ws.send_json({'success':1})
-    await ws.close()
-    logger.info('{0}@_@{1} {2} {3} {4}'.format(
-        'music upload', f_index, song['user_id'], song['song_name'], '1'
-    ))
-    ws_audio.close('hoge')
+#     ws_audio.close('hoge')
 
 @api.route('/api/random')
 def random_number(req, resp):
@@ -112,4 +125,6 @@ def random_number(req, resp):
     resp.media = result
 
 if __name__ == '__main__':
+    backapp.create_eventnames(functions)
+
     api.run(debug=True)

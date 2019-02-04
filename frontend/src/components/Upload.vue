@@ -1,10 +1,10 @@
 <template>
-  <div id="app">
+  <div>
   <!-- <div v-if="!music"> -->
     <h2>Select an music</h2>
-    <input type="file" accept="audio/*" capture="microphone" id="recorder">
-    <audio id="player" controls></audio>
-    <button @click="onFileChange">preview</button>
+      <input @change="onFileChange" type="file" name="file" accept="audio/*" capture="microphone">
+      <audio id="player" controls></audio>
+    <div id="byte_content"></div>
   <!-- </div>
   <div v-else> -->
     <h2>data of music</h2>
@@ -12,60 +12,51 @@
     <input type="text" placeholder="music name" v-model="song_name">
     <h3>singer name</h3>
     <input type="text" placeholder="name of singer" v-model="singer">
-    <button @click="upload">upload music</button>
-    <button @click="removeImage">Remove music</button>
+    <button id="btn" @click="upload">upload music</button>
   <!-- </div> -->
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data () {
     return {
       user_id: 100,
-      song_name: '',
-      singer: ''
+      song_name: 'hoge',
+      singer: 'hoge',
+      uploadFile: null,
+      resp: 0
     }
   },
   methods: {
-    onFileChange () {
-      var recorder = document.getElementById('recorder')
-      var player = document.getElementById('player')
-      recorder.addEventListener('change', function (e) {
-        player.src = URL.createObjectURL(e.target.files[0])
-      })
+    onFileChange (e) {
+      e.preventDefault()
+      const file = e.target.files[0]
+      const player = document.getElementById('player')
+      player.src = URL.createObjectURL(file)
+      this.uploadFile = file
     },
     upload () {
-      var file = document.getElementById('recorder').files[0]
-      var reader = new FormData()
-      reader.onloadend = function (evt) {
-        var blob = evt.target.result
-        $.ajax({
-          url: 'http://localhost:5024:ws/upload',
-          type: 'POST',
-          data: blob,
-          processData: false,
-        }).done(function (data) {
-          document.location = '/'
-        }).fail(function (data) {
-        })
+      let formData = new FormData()
+      formData.append('user_id', this.user_id)
+      formData.append('song_name', this.song_name)
+      formData.append('singer', this.singer)
+      formData.append('music', this.uploadFile)
+      let config = {
+        headers: {
+          'context-type': 'multipart/form-data'
+        }
       }
-    },
-    removeImage: function (e) {
-      this.music = ''
+      console.log(...formData.entries())
+      axios.post('http://localhost:5042/api/upload', formData, config)
+        .then(response => {
+          this.resp = response.data.success
+        })
+        .catch(error => {
+          console.log(error)
+        })
     }
   }
 }
 </script>
-
-<style scoped>
-#app {
-  text-align: center;
-}
-img {
-  width: 30%;
-  margin: auto;
-  display: block;
-  margin-bottom: 10px;
-}
-</style>
