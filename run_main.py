@@ -84,14 +84,14 @@ async def upload(req, resp):
     data = cgi.FieldStorage(fp=io.BytesIO(await req.content), environ={'REQUEST_METHOD': 'POST'}, headers=req.headers)
     song = {d.name:d.value for d in data.list}
     # {'user_id':number, 'song_name':name, 'singer':singer, 'music':data}
-    result = backapp.add_music(song['song_name'], song['singer'])
-    backapp.music_data(song['music'])
-    logger.info('{0}@_@{1} {2} {3} {4}'.format(
-        'music upload', f_index, song['user_id'], song['song_name'], result
-    ))
-    print(result)
-    result = 100
-    resp.media = {'success':result}
+    song_id = backapp.add_music(song['song_name'], song['singer'])
+    success = 0
+    if song_id != -1:
+        success = backapp.music_data(song_id, song['music'])
+        logger.info('{0}@_@{1} {2} {3} {4}'.format(
+            'music upload', f_index, song['user_id'], song_id, success
+        ))
+    resp.media = {'song_id':song_id, 'success': success}
 
 # def ws_upload(client, server, message):
 #     f_index = functions.index(sys._getframe().f_code.co_name)

@@ -2,6 +2,7 @@ import numpy as np
 import wave
 import logging
 import server
+import music
 from database import SQLiteHandler
 
 def create_logger(filename):
@@ -39,11 +40,10 @@ def music_list():
     return server.music_list()
 
 def add_music(name, singer):
-    print('add_music:', name, singer)
     return server.addMusic(name, singer)
 
-def music_data(hoge):
-    return 1
+def music_data(song_id, data):
+    return music.upload(song_id, data)
 
 class WebSocketApp:
     def __init__(self):

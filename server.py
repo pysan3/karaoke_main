@@ -58,15 +58,21 @@ def music_list():
 
 def addMusic(name, singer):
     session = Session()
+    song = session.query(Musics).filter_by(song_name=name, singer=singer).one_or_none()
+    if song != None:
+        print('another song found')
+        return -1
     session.add(Musics(
-        song_name=name,
+        song_name=1,
         singer=singer,
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.commit()
-    song = session.query(Musics).filter_by(song_name=name, singer=singer).all()
     session.close()
-    return song[0].id if len(song) == 1 else -1
+    session = Session()
+    song = session.query(Musics).filter_by(song_name=1, singer=singer).all()
+    session.close()
+    return song[0].id
 
 def add_users(name, password):
     session = Session()
