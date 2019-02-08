@@ -6,7 +6,7 @@
         {{ item.id }}  {{ item.name }}
       </li>
     </ul>
-    <router-link to="/api/musicupload"><a>music upload</a></router-link>
+    <router-link to="/musicupload"><a>music upload</a></router-link>
   </div>
 </template>
 

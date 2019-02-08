@@ -5,10 +5,11 @@ const routerOptions = [
   { path: '/', component: 'Home' },
   { path: '/about', component: 'About' },
   { path: '/helloworld', component: 'HelloWorld' },
-  { path: '/api/login', component: 'Login' },
-  { path: '/api/signup', component: 'Signup' },
-  { path: '/api/musiclist', component: 'MusicList' },
-  { path: '/api/musicupload', component: 'Upload' },
+  { path: '/login', component: 'Login' },
+  { path: '/signup', component: 'Signup' },
+  { path: '/musiclist', component: 'MusicList' },
+  { path: '/musicupload', component: 'Upload' },
+  { path: '/sing', component: 'Sing' },
   { path: '*', component: 'NotFound' }
 ]
 

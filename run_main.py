@@ -9,7 +9,7 @@ import cgi
 
 import app as backapp
 
-api = responder.API(templates_dir='./dist', static_dir='./dist/static')
+api = responder.API(templates_dir='./dist', static_dir='./dist/static', debug=True)
 api.add_route(websocket=True)
 logger = backapp.create_logger(__name__)
 # logger.info(msg@_@event_id, user_id, push, result)
@@ -93,24 +93,13 @@ async def upload(req, resp):
         ))
     resp.media = {'song_id':song_id, 'success': success}
 
-# def ws_upload(client, server, message):
-#     f_index = functions.index(sys._getframe().f_code.co_name)
-#     ws_audio = backapp.WebSocketHandler()
-#     song = json.loads(message)
-#     print(client, server, song)
-#     ws_audio.upload(song['music'])
-#     # await ws.accept()
-#     # while True:
-#     #     song = await ws.receive_json()
-#     #     # {'user_id':number, 'song_name':name, 'singer':singer, 'music':data}
-#     #     if song != {}:
-#     #         ws_audio.upload(song['music'])
-#     #     song = {}
-#     #     await ws.send_json({'success':1})
-#     logger.info('{0}@_@{1} {2} {3} {4}'.format(
-#         'music upload', f_index, song['user_id'], song['song_name'], '1'
-#     ))
-#     ws_audio.close('hoge')
+@api.route('/ws', websocket=True)
+async def websocket(ws):
+    await ws.accept()
+    while True:
+        name = await ws.receive_text()
+        await ws.send_text(f'hello {name}!')
+    await ws.close()
 
 @api.route('/api/random')
 def random_number(req, resp):

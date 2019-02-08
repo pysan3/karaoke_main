@@ -57,6 +57,7 @@ export default {
         .then(response => {
           this.song_id = response.data.song_id
           this.resp = response.data.success
+          document.location = '/#/musiclist'
         })
         .catch(error => {
           console.log(error)

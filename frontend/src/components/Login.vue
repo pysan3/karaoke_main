@@ -6,13 +6,12 @@
     <input type="password" placeholder="Password" v-model="user_password">
     <button @click="tryLogin">Register</button>
     <p>Do you have an account?
-      <router-link to="/api/signup">sign up now!!</router-link>
+      <router-link to="/signup">sign up now!!</router-link>
     </p>
     <p>login succeeded {{ isFound }}</p>
     <p>login user_id {{ user_id }}</p>
     <p>login user_name {{ user_name }}</p>
     <p>login msg {{ msg }}</p>
-    <!-- hogehoge -->
   </div>
 </template>
 

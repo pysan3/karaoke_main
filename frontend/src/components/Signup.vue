@@ -6,7 +6,7 @@
     <input type="password" placeholder="Password" v-model="user_password">
     <button @click="trySignup">Register</button>
     <p>Do you have an account?
-      <router-link to="/api/login">log in now!!</router-link>
+      <router-link to="/login">log in now!!</router-link>
     </p>
     <p>signup succeeded {{ succeed }}</p>
     <p>signup user_id {{ user_id }}</p>
