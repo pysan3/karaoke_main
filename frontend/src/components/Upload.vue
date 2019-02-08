@@ -51,7 +51,9 @@ export default {
       console.log(...formData.entries())
       axios.post('http://localhost:5042/api/upload', formData, config)
         .then(response => {
+          console.log('got response')
           this.resp = response.data.success
+          console.log(this.resp)
         })
         .catch(error => {
           console.log(error)

@@ -4,7 +4,8 @@ import sys
 import json
 from random import randint
 import time
-from requests_toolbelt.multipart	 import decoder
+import io
+import cgi
 
 import app as backapp
 
@@ -79,20 +80,16 @@ async def musiclist(req, resp):
 
 @api.route('/api/upload')
 async def upload(req, resp):
-    # f_index = functions.index(sys._getframe().f_code.co_name)
-    print('function triggered')
-    song = await req.media()
-    print('await finished')
-    song = decoder.MultipartDecoder.from_response(song)
-    print(song)
+    f_index = functions.index(sys._getframe().f_code.co_name)
+    data = cgi.FieldStorage(fp=io.BytesIO(await req.content), environ={'REQUEST_METHOD': 'POST'}, headers=req.headers)
+    song = {d.name:d.value for d in data.list}
     # {'user_id':number, 'song_name':name, 'singer':singer, 'music':data}
-    # print('sent data:', song)
-    # result = backapp.add_music(song['song_name'], song['singer'])
-    # backapp.music_data(song['music'])
-    # logger.info('{0}@_@{1} {2} {3} {4}'.format(
-    #     'music upload', f_index, song['user_id'], song['song_name'], result
-    # ))
-    # print(result)
+    result = backapp.add_music(song['song_name'], song['singer'])
+    backapp.music_data(song['music'])
+    logger.info('{0}@_@{1} {2} {3} {4}'.format(
+        'music upload', f_index, song['user_id'], song['song_name'], result
+    ))
+    print(result)
     result = 100
     resp.media = {'success':result}
 

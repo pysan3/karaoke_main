@@ -39,9 +39,10 @@ def music_list():
     return server.music_list()
 
 def add_music(name, singer):
+    print('add_music:', name, singer)
     return server.addMusic(name, singer)
 
-def music_data(data):
+def music_data(hoge):
     return 1
 
 class WebSocketApp:
