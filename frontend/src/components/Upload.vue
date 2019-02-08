@@ -43,7 +43,6 @@ export default {
       this.uploadFile = file
     },
     upload () {
-      console.log('sending...')
       let formData = new FormData()
       formData.append('user_id', this.user_id)
       formData.append('song_name', this.song_name)

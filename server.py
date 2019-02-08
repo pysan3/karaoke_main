@@ -63,14 +63,14 @@ def addMusic(name, singer):
         print('another song found')
         return -1
     session.add(Musics(
-        song_name=1,
+        song_name=name,
         singer=singer,
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.commit()
     session.close()
     session = Session()
-    song = session.query(Musics).filter_by(song_name=1, singer=singer).all()
+    song = session.query(Musics).filter_by(song_name=name, singer=singer).all()
     session.close()
     return song[0].id
 
