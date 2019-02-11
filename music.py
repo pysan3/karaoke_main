@@ -9,3 +9,9 @@ def upload(song_id, data):
     w.writeframes(data)
     w.close()
     return 1
+
+def load_music(song_id):
+    fname = 'audio/wav/{0}.wav'.format(song_id)
+    with wave.open(fname, 'rb') as wf:
+        data = wf.readframes(wf.getnframes())
+    return data

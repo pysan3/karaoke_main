@@ -2,6 +2,7 @@ import responder
 import sqlite3
 import sys
 import json
+import os
 from random import randint
 import time
 import io
@@ -93,13 +94,21 @@ async def upload(req, resp):
         ))
     resp.media = {'song_id':song_id, 'success': success}
 
+@api.route('/audio/load_music/{song_id}')
+async def load_music(req, resp, *, song_id):
+    result = backapp.load_music(song_id)
+    resp.content = result
+
 @api.route('/ws', websocket=True)
 async def websocket(ws):
+    ws_handler = backapp.WebSocketApp()
     await ws.accept()
     while True:
-        name = await ws.receive_text()
-        await ws.send_text(f'hello {name}!')
-    await ws.close()
+        data = await ws.receive_bytes()
+        os.system('cls')
+        ws_handler.upload(data)
+        result = json.dumps({'receive_index':ws_handler.return_counter()})
+        ws.send_json(result)
 
 @api.route('/api/random')
 def random_number(req, resp):

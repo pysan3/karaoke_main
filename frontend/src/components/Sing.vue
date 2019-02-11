@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="sing">press here</button>
+    <button id='btn'>press here</button>
   </div>
 </template>
 
@@ -8,55 +8,61 @@
 export default {
   data () {
     return {
-      song_id: 1,
-      musicdata: null
+      song_id: 'trumpet'
     }
   },
   methods: {
-    sleep (msec) {
-      return new Promise(function (resolve) {
-        setTimeout(function () {
-          resolve()
-        }, msec)
-      })
-    },
-    sing () {
-      const vm = this
+    getMusic (context) {
+      const request = new XMLHttpRequest()
+      request.responseType = 'arraybuffer'
+      request.onreadystatechange = () => {
+        console.log(request.response)
+        if (request.readyState === 4) {
+          if (request.status === 0 || request.status === 200) {
+            context.decodeAudioData(request.response).then(buffer => {
+              const btn = document.getElementById('btn')
+              btn.onclick = () => {
+                playSound(buffer)
+              }
+            })
+          }
+        }
+      }
+      const playSound = buffer => {
+        const p = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        const src = context.createBufferSource()
+        src.buffer = buffer
+        src.connect(context.destination)
+        src.start(0)
+        p.then(stream => {
+          src.onended = () => {
+            stream.getAudioTracks()[0].stop()
+            console.log('stream ended')
+          }
+          handleSuccess(stream)
+        })
+      }
       const handleSuccess = stream => {
-        const context = new AudioContext()
-        const input = context.createMediaStreamSource(stream)
-        const processor = context.createScriptProcessor(1024, 1, 1)
+        const wsContext = new AudioContext()
+        const input = wsContext.createMediaStreamSource(stream)
+        const processor = wsContext.createScriptProcessor(1024, 1, 1)
         const connection = new WebSocket('ws://localhost:5042/ws')
         input.connect(processor)
-        processor.connect(context.destination)
+        processor.connect(wsContext.destination)
         processor.onaudioprocess = e => {
-          let voice = e.inputBuffer.getChannelData(0)
+          const voice = e.inputBuffer.getChannelData(0)
           connection.send(voice.buffer)
         }
       }
-      const p = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      p.then(handleSuccess)
-    },
-    getMusic () {
-      window.AudioContext = window.AudioContext || window.webkitAudioContext
-      const vm = this
-      const context = new AudioContext()
-      const loadAudio = url => {
-        const request = new XMLHttpRequest()
-        request.open('GET', url, true)
-        request.responseType = 'arraybuffer'
-        request.onload = () => {
-          context.decodeAudioData(request.response, function (buffer) {
-            vm.musicdata = buffer
-          }, onerror)
-        }
-        request.send()
-      }
-      loadAudio('http://localhost:5042/getmusic/' + this.song_id)
-    },
-    created () {
-      this.getMusic()
+      // const accessURL = 'http://localhost:5042/audio/load_music/' + this.song_id
+      request.open('GET', './assets/4.wav', true)
+      request.send()
     }
+  },
+  created () {
+    window.AudioContext = window.AudioContext || window.webkitAudioContext
+    const context = new AudioContext()
+    this.getMusic(context)
   }
 }
 </script>

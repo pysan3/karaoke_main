@@ -45,18 +45,19 @@ def add_music(name, singer):
 def music_data(song_id, data):
     return music.upload(song_id, data)
 
+def load_music(song_id):
+    return music.load_music(song_id)
+
 class WebSocketApp:
     def __init__(self):
         self.data = []
-        print('ready for websocket')
-    def new_client(self):
         self.counter = 0
     def upload(self, data):
-        self.data.append(data)
+        self.data.append(np.frombuffer(data, dtype='float32'))
         self.counter += 1
     def return_counter(self):
         return self.counter
-    def close(self, path):
+    def close(self):
         # print('end data : ', end='')
         # print(self.data)
         print(self.counter)
@@ -69,7 +70,6 @@ class WebSocketApp:
         #     wf.setframerate(48000)
         #     wf.writeframes(arr.tobytes('C'))
         # self.data.clear()
-        print('closed websocket')
 
 def check_database():
     server.add_users('takuto', '000')
