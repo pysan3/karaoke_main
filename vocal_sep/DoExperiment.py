@@ -18,7 +18,7 @@ Code example for performing vocal separation with U-Net
 """
 folder = './wav/'
 fname = "original_mix.wav"
-mag, phase = util.LoadAudio(fname)
+mag, phase = util.LoadAudio(folder + fname)
 start = 2048
 end = 2048+1024
 

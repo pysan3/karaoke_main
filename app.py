@@ -1,6 +1,8 @@
+import logging
 import numpy as np
 import wave
-import logging
+import hashlib
+
 import server
 import music
 from database import SQLiteHandler
@@ -25,12 +27,12 @@ def create_eventnames(funcs):
 
 def login(data):
     name = data['user_name']
-    password = data['user_password']
+    password = hashlib.sha256(data['user_password'].encode()).hexdigest()
     return server.login(name, password)
 
 def signup(data):
     name = data['user_name']
-    password = data['user_password']
+    password = hashlib.sha256(data['user_password'].encode()).hexdigest()
     return server.signup(name, password)
 
 def logged_in(data):
@@ -53,18 +55,19 @@ class WebSocketApp:
         self.data = []
         self.counter = 0
     def upload(self, data):
-        self.data.append(data)
+        self.data.append(
+            (np.frombuffer(data, dtype='float32') * 32767).astype(np.int16)
+        )
         self.counter += 1
     def return_counter(self):
         return self.counter
     def close(self):
-        print('end data : ', self.counter)
+        v = np.array(self.data).flatten()
         with wave.Wave_write('hoge.wav') as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
             wf.setframerate(48000)
-            wf.writeframes(self.data)
-        self.data.clear()
+            wf.writeframes(v.tobytes('C'))
 
 def check_database():
     server.add_users('takuto', '000')

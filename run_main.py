@@ -96,7 +96,11 @@ async def upload(req, resp):
 
 @api.route('/audio/load_music/{song_id}')
 async def load_music(req, resp, *, song_id):
+    f_index = functions.index(sys._getframe().f_code.co_name)
     result = backapp.load_music(song_id)
+    logger.info('{0}@_@{1} {2} {3} {4}'.format(
+        'music_request', f_index, 0, song_id, 1
+    ))
     resp.content = result
 
 @api.route('/ws', websocket=True)

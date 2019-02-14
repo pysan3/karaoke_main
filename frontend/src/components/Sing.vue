@@ -8,7 +8,7 @@
 export default {
   data () {
     return {
-      song_id: 3,
+      song_id: 2,
       musicStop: 0,
       ready: 0
     }

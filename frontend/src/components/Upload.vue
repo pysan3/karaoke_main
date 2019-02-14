@@ -16,6 +16,10 @@
     <input type="text" placeholder="name of singer" v-model="singer">
     <button id="btn" @click="upload">upload music</button>
     <br>
+    <p>
+      <router-link to="/sing">sing now</router-link>
+    </p>
+    <br>
     {{ song_id }}
   <!-- </div> -->
   </div>
@@ -29,7 +33,7 @@ export default {
       user_id: 100,
       song_id: -1,
       song_name: 'hoge',
-      singer: 'hoge',
+      singer: 'fhana',
       uploadFile: null,
       resp: 0
     }
