@@ -30,7 +30,7 @@ export default {
             btn.onclick = () => {
               context = new AudioContext()
               const p = context.decodeAudioData(responseData)
-              connection = new WebSocket('ws://localhost:5042/ws')
+              connection = new WebSocket('ws://localhost:5042/ws/sing')
               connection.onopen = e => {
                 p.then(buffer => {
                   playSound(buffer)

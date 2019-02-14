@@ -103,7 +103,7 @@ async def load_music(req, resp, *, song_id):
     ))
     resp.content = result
 
-@api.route('/ws', websocket=True)
+@api.route('/ws/sing', websocket=True)
 async def websocket(ws):
     ws_handler = backapp.WebSocketApp()
     await ws.accept()
