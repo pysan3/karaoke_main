@@ -53,23 +53,18 @@ class WebSocketApp:
         self.data = []
         self.counter = 0
     def upload(self, data):
-        self.data.append(np.frombuffer(data, dtype='float32'))
+        self.data.append(data)
         self.counter += 1
     def return_counter(self):
         return self.counter
     def close(self):
-        # print('end data : ', end='')
-        # print(self.data)
-        print(self.counter)
-        # v = np.array(self.data)
-        # v.flatten()
-        # arr = (v * 32767).astype(np.int16)
-        # with wave.Wave_write('hoge.wav') as wf:
-        #     wf.setnchannels(1)
-        #     wf.setsampwidth(2)
-        #     wf.setframerate(48000)
-        #     wf.writeframes(arr.tobytes('C'))
-        # self.data.clear()
+        print('end data : ', self.counter)
+        with wave.Wave_write('hoge.wav') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(48000)
+            wf.writeframes(self.data)
+        self.data.clear()
 
 def check_database():
     server.add_users('takuto', '000')

@@ -10,7 +10,7 @@ import cgi
 
 import app as backapp
 
-api = responder.API(templates_dir='./dist', static_dir='./dist/static', debug=True)
+api = responder.API(templates_dir='./dist', static_dir='./dist/static')
 api.add_route(websocket=True)
 logger = backapp.create_logger(__name__)
 # logger.info(msg@_@event_id, user_id, push, result)
@@ -104,11 +104,11 @@ async def websocket(ws):
     ws_handler = backapp.WebSocketApp()
     await ws.accept()
     while True:
-        data = await ws.receive_bytes()
-        os.system('cls')
-        ws_handler.upload(data)
-        result = json.dumps({'receive_index':ws_handler.return_counter()})
-        ws.send_json(result)
+        try:
+            ws_handler.upload(await ws.receive_bytes())
+        except:
+            ws_handler.close()
+            break
 
 @api.route('/api/random')
 def random_number(req, resp):
@@ -121,5 +121,4 @@ def random_number(req, resp):
 
 if __name__ == '__main__':
     backapp.create_eventnames(functions)
-
-    api.run(debug=True)
+    api.run()
