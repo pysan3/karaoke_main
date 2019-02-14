@@ -17,7 +17,7 @@
     <button id="btn" @click="upload">upload music</button>
     <br>
     <p>
-      <router-link to="/sing">sing now</router-link>
+      <router-link to="/musiclist">sing now</router-link>
     </p>
     <br>
     {{ song_id }}
@@ -34,8 +34,7 @@ export default {
       song_id: -1,
       song_name: 'hoge',
       singer: 'fhana',
-      uploadFile: null,
-      resp: 0
+      uploadFile: null
     }
   },
   methods: {
@@ -47,12 +46,12 @@ export default {
       this.uploadFile = file
     },
     upload () {
-      let formData = new FormData()
+      const formData = new FormData()
       formData.append('user_id', this.user_id)
       formData.append('song_name', this.song_name)
       formData.append('singer', this.singer)
       formData.append('music', this.uploadFile)
-      let config = {
+      const config = {
         headers: {
           'context-type': 'multipart/form-data'
         }
@@ -60,7 +59,6 @@ export default {
       axios.post('http://localhost:5042/api/upload', formData, config)
         .then(response => {
           this.song_id = response.data.song_id
-          this.resp = response.data.success
           document.location = '/#/musiclist'
         })
         .catch(error => {

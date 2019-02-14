@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 import logging
 from datetime import datetime
-import os
 
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker

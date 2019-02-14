@@ -8,9 +8,9 @@
 export default {
   data () {
     return {
-      song_id: 2,
-      musicStop: 0,
-      ready: 0
+      user_id: 100,
+      song_id: 3,
+      musicStop: 0
     }
   },
   methods: {
@@ -32,6 +32,10 @@ export default {
               const p = context.decodeAudioData(responseData)
               connection = new WebSocket('ws://localhost:5042/ws/sing')
               connection.onopen = e => {
+                connection.send(JSON.stringify({
+                  user_id: vm.user_id,
+                  framerate: context.sampleRate
+                }))
                 p.then(buffer => {
                   playSound(buffer)
                 })
@@ -50,8 +54,16 @@ export default {
             stream.getTracks().forEach(track => {
               track.stop()
             })
+            function isDone () {
+              if (connection.bufferedAmount === 0) {
+                clearInterval(interval)
+                connection.close()
+                connection = null
+                window.location.href = '/'
+              }
+            }
             stream = null
-            vm.musicStop = 1
+            let interval = setInterval(isDone, 1000)
           }
           src.start(0)
           handleSuccess(stream)
@@ -69,19 +81,8 @@ export default {
             connection.send(voice.buffer)
           }
         }
-        function disconnect () {
-          clearInterval(interval)
-          connection.close(1000, 'end of music')
-          connection = null
-        }
-        function isDone () {
-          if (vm.musicStop && connection.bufferedAmount === 0) {
-            disconnect()
-          }
-        }
-        let interval = setInterval(isDone, 1000)
       }
-      request.open('GET', 'http://localhost:5042/audio/load_music/' + this.song_id, true)
+      request.open('GET', 'http://localhost:5042/audio/load_music/' + this.user_id + '_' + this.song_id, true)
       request.send()
     }
   },

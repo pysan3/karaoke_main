@@ -1,11 +1,102 @@
-import logging
 import numpy as np
 import wave
+import logging
 import hashlib
+from datetime import datetime
 
-import server
-import music
-from database import SQLiteHandler
+from database import Session, Eventlogs, Eventnames, Users, Musics, SQLiteHandler
+
+def create_eventnames(funcs):
+    session = Session()
+    names =  session.query(Eventnames).all()
+    if len(names) == 0:
+        for func in funcs:
+            session.add(Eventnames(event_name=func))
+    session.commit()
+    session.close()
+    print('DONE: init db')
+
+def login(data):
+    session = Session()
+    user = session.query(Users).filter_by(user_name=data['user_name']).all()
+    session.close()
+    user_id = -1
+    password = hashlib.sha256(data['user_password'].encode()).hexdigest()
+    if len(user) == 1:
+        if user[0].user_password == password:
+            msg = 'success'
+            user_id = user[0].id
+        else:
+            msg = 'wrong password'
+    else:
+        msg = 'wrong username'
+    return {'isFound': len(user), 'user_id': user_id, 'msg': msg}
+
+def signup(data):
+    name = data['user_name']
+    user_id = -1
+    session = Session()
+    user = session.query(Users).filter_by(user_name=name).all()
+    if len(user) == 0:
+        user_id = session.query(Users).count() + 1
+        session.add(Users(
+            user_name=name,
+            user_password=hashlib.sha256(data['user_password'].encode()).hexdigest(),
+            created_at=datetime.now().isoformat(' ', 'seconds')
+        ))
+        session.commit()
+        msg = 'succeeded to create an user account'
+    else:
+        msg = 'already exists'
+    session.close()
+    return {'user_id': user_id, 'msg': msg}
+
+def logged_in(data):
+    # TODO: write here for auto login
+    return {'result':0}
+
+def music_list():
+    session = Session()
+    songs = session.query(Musics).all()
+    session.close()
+    result = []
+    for song in songs:
+        result.append({'id':song.id, 'name':song.song_name, 'singer':song.singer})
+    return result
+
+def add_music(name, singer):
+    session = Session()
+    song = session.query(Musics).filter_by(song_name=name, singer=singer).all()
+    if len(song) != 0:
+        print('another song found')
+        return -1
+    song_id = session.query(Musics).count() + 1
+    session.add(Musics(
+        song_name=name,
+        singer=singer,
+        created_at=datetime.now().isoformat(' ', 'seconds'),
+    ))
+    session.commit()
+    session.close()
+    return song_id
+
+class WebSocketApp:
+    def __init__(self):
+        self.data = []
+        self.counter = 0
+        self.max_index = 0
+    def upload(self, data):
+        self.data.append((np.frombuffer(data, dtype='float32') * 32767).astype(np.int16))
+        self.counter += 1
+    def return_counter(self):
+        return self.counter
+    def close(self, data):
+        v = np.array(self.data).flatten()
+        with wave.Wave_write('hoge.wav') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(data['framerate'])
+            wf.writeframes(v.tobytes('C'))
 
 def create_logger(filename):
     logger = logging.getLogger(filename)
@@ -20,63 +111,3 @@ def create_logger(filename):
     logger.addHandler(sqlite_handler)
     logger.propagate = False
     return logger
-
-def create_eventnames(funcs):
-    server.eventnames(funcs)
-    print('DONE: init db')
-
-def login(data):
-    name = data['user_name']
-    password = hashlib.sha256(data['user_password'].encode()).hexdigest()
-    return server.login(name, password)
-
-def signup(data):
-    name = data['user_name']
-    password = hashlib.sha256(data['user_password'].encode()).hexdigest()
-    return server.signup(name, password)
-
-def logged_in(data):
-    return {'result': 0}
-
-def music_list():
-    return server.music_list()
-
-def add_music(name, singer):
-    return server.addMusic(name, singer)
-
-def music_data(song_id, data):
-    return music.upload(song_id, data)
-
-def load_music(song_id):
-    return music.load_music(song_id)
-
-class WebSocketApp:
-    def __init__(self):
-        self.data = []
-        self.counter = 0
-    def upload(self, data):
-        self.data.append(
-            (np.frombuffer(data, dtype='float32') * 32767).astype(np.int16)
-        )
-        self.counter += 1
-    def return_counter(self):
-        return self.counter
-    def close(self):
-        v = np.array(self.data).flatten()
-        with wave.Wave_write('hoge.wav') as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(48000)
-            wf.writeframes(v.tobytes('C'))
-
-def check_database():
-    server.add_users('takuto', '000')
-    user_dataset = server.return_users()
-    for user in user_dataset:
-        print(user.id, user.user_name, user.user_password, user.created_at)
-
-def debug():
-    check_database()
-
-if __name__ == '__main__':
-    debug()

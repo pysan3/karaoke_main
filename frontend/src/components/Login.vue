@@ -22,21 +22,25 @@ export default {
     return {
       user_name: '',
       user_password: '',
-      isFound: 0,
-      user_id: 0,
-      msg: ''
+      user_id: -1
     }
   },
   methods: {
     tryLogin () {
+      if (this.user_name.length * this.user_password.length === 0) {
+        alert('should not be zero charactors')
+        return
+      }
       axios.post('http://localhost:5042/api/login', {
         user_name: this.user_name,
         user_password: this.user_password
       })
         .then(response => {
-          this.isFound = response.data.isFound
-          this.user_id = response.data.user_id
-          this.msg = response.data.msg
+          if ((this.user_id = response.data.user_id) !== -1) {
+            window.location.href = '/'
+          } else if (this.user_name.length !== 0) {
+            alert(response.data.msg)
+          }
         })
         .catch(error => {
           console.log(error)
@@ -44,7 +48,9 @@ export default {
     }
   },
   created () {
-    this.tryLogin()
+    if (this.user_name.length !== 0) {
+      this.tryLogin()
+    }
   }
 }
 </script>

@@ -22,29 +22,30 @@ export default {
     return {
       user_name: '',
       user_password: '',
-      succeed: 0,
-      user_id: 0,
-      msg: 0
+      user_id: -1
     }
   },
   methods: {
     trySignup () {
+      if (this.user_name.length * this.user_password.length === 0) {
+        alert('should not be zero charactors')
+        return
+      }
       axios.post('http://localhost:5042/api/signup', {
         user_name: this.user_name,
         user_password: this.user_password
       })
         .then(response => {
-          this.succeed = response.data.succeed
-          this.user_id = response.data.user_id
-          this.msg = response.data.msg
+          if ((this.user_id = response.data.user_id) !== -1) {
+            window.location.href = '/'
+          } else if (this.user_name.length !== 0) {
+            alert(response.data.msg)
+          }
         })
         .catch(error => {
           console.log(error)
         })
     }
-  },
-  created () {
-    this.trySignup()
   }
 }
 </script>
