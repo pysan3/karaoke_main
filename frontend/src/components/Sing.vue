@@ -9,8 +9,7 @@ export default {
   data () {
     return {
       user_id: 100,
-      song_id: 3,
-      musicStop: 0
+      song_id: 3
     }
   },
   methods: {
@@ -24,7 +23,6 @@ export default {
       request.onreadystatechange = () => {
         if (request.readyState === 4) {
           if (request.status === 0 || request.status === 200) {
-            vm.ready = 1
             const responseData = request.response
             const btn = document.getElementById('btn')
             btn.onclick = () => {
