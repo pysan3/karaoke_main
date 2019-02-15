@@ -21,6 +21,7 @@ functions = [
     'loggedin',
     'login',
     'signup',
+    'logout',
     'musiclist',
     'upload',
     'ws_upload',
@@ -46,17 +47,24 @@ async def login(req, resp):
     ))
     resp.media = result
 
-@api.route('/api/loggedin')
-async def loggedin(req, resp):
+@api.route('/api/logout')
+async def logout(req, resp):
     f_index = functions.index(sys._getframe().f_code.co_name)
-    user = await req.media()
-    # {'user_id': number}
-    result = backapp.logged_in(user)
-    # {'isLoggedin': 1 / 0}
+    user_id = await req.text
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
-        '' if result['isLoggedin'] else 'not ' + 'logged in', f_index, user['user_id'], user['user_id'], result['isLoggedin']
+        'logout', f_index, user_id, 'logout request', 1
     ))
-    resp.media = result
+    resp.text = '1'
+
+@api.route('/api/loggedin/{user_id}')
+async def loggedin(req, resp, *, user_id):
+    f_index = functions.index(sys._getframe().f_code.co_name)
+    result = backapp.logged_in(int(user_id))
+    # result = 1 / 0
+    logger.info('{0}@_@{1} {2} {3} {4}'.format(
+        '' if result else 'not ' + 'logged in', f_index, user_id, user_id, result
+    ))
+    resp.text = str(result)
 
 @api.route('/api/signup')
 async def signup(req, resp):

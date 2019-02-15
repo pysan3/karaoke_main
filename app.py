@@ -51,9 +51,20 @@ def signup(data):
     session.close()
     return {'user_id': user_id, 'msg': msg}
 
-def logged_in(data):
+def logged_in(user_id):
     # TODO: write here for auto login
-    return {'result':0}
+    if user_id == -1:
+        return 0
+    session = Session()
+    result = session.query(Eventlogs).filter_by(user_id=user_id).all()
+    event_name_logout = session.query(Eventnames).filter_by(event_name='logout').one().id
+    session.close()
+    if len(result) == 0:
+        return 0
+    elif result[-1].event_id == event_name_logout:
+        return 0
+    else:
+        return 1
 
 def music_list():
     session = Session()
