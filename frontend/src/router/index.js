@@ -10,7 +10,7 @@ const routerOptions = [
   { path: '/signup', component: 'Signup' },
   { path: '/musiclist', component: 'MusicList' },
   { path: '/musicupload', component: 'Upload' },
-  { path: '/sing', component: 'Sing' },
+  { path: '/sing/:song_id', component: 'Sing' },
   { path: '*', component: 'NotFound' }
 ]
 

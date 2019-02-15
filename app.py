@@ -72,7 +72,7 @@ def music_list():
     session.close()
     result = []
     for song in songs:
-        result.append({'id':song.id, 'name':song.song_name, 'singer':song.singer})
+        result.append({'song_id':song.id, 'name':song.song_name, 'singer':song.singer})
     return result
 
 def add_music(name, singer):

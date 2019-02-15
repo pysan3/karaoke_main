@@ -1,3 +1,3 @@
-export const UPDATE_USER_ID = 'UPDATE_USER_ID'
+export const USER_ID = 'USER_ID'
 export const UPDATE_MESSAGE = 'UPDATE_MESSAGE'
 export const DUMMY_TYPE = 'DUMMY_TYPE'

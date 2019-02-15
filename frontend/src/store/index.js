@@ -5,23 +5,26 @@ import * as types from './mutation-types'
 Vue.use(Vuex)
 
 const state = {
-  user_id: -1,
-  msg: 'hello'
+  user_id: 1
 }
 
 const mutations = {
-  [types.UPDATE_MESSAGE] (state, newMsg) {
-    state.msg = newMsg
-  },
-  [types.UPDATE_USER_ID] (state, num) {
+  [types.USER_ID] (state, num) {
     state.user_id = num - 0
   }
 }
 
 const actions = {
-  repeat (context) {
-    let msg = context.state.msg
-    context.commit(types.UPDATE_MESSAGE, `${msg} ${msg}`)
+  loggedin (context) {
+    const request = new XMLHttpRequest()
+    request.responseType = 'text'
+    request.onload = () => {
+      if (request.responseText === '0') {
+        window.location.href = '/'
+      }
+    }
+    request.open('GET', 'http://localhost:5042/api/loggedin/' + context.state.user_id, true)
+    request.send()
   }
 }
 

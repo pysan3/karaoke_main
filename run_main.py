@@ -81,11 +81,10 @@ async def signup(req, resp):
 @api.route('/api/musiclist')
 async def musiclist(req, resp):
     f_index = functions.index(sys._getframe().f_code.co_name)
-    user_id = await req.media()
     result = backapp.music_list()
     # {'id':number, 'name':'song_name', 'singer':'singer_name'}
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
-        'success', f_index, user_id['user_id'], '', 'list of musics'
+        'success', f_index, 0, '', 'list of musics'
     ))
     resp.media = result
 
@@ -109,6 +108,10 @@ async def load_music(req, resp, *, req_id):
     user_id = req_id.split('_')[0]
     song_id = req_id.split('_')[1]
     result = backmusic.load_music(song_id)
+    # {'song_id':song.id, 'name':song.song_name, 'singer':song.singer}
+    if result == False:
+        resp.status_code = 500
+        return
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
         'music_request', f_index, user_id, song_id, 1
     ))

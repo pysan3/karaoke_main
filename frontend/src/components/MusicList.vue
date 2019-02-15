@@ -1,9 +1,9 @@
 <template>
-  <div id="app">
+  <div>
     <p>Music List</p>
     <ul>
       <li v-for="item in mList" v-bind:key="item.id">
-        {{ item.id }}  {{ item.name }}
+        {{ item.song_id }}  {{ item.name }}  {{ item.singer }}
       </li>
     </ul>
     <router-link to="/musicupload"><a>music upload</a></router-link>
@@ -15,15 +15,12 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      user_id: 100,
       mList: []
     }
   },
   methods: {
     getMusicList () {
-      axios.post('http://localhost:5042/api/musiclist', {
-        user_id: this.user_id
-      })
+      axios.get('http://localhost:5042/api/musiclist')
         .then(response => {
           this.mList = response.data
         })

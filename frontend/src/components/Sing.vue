@@ -5,20 +5,23 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
-      user_id: 100,
-      song_id: 3
+      song_id: this.$route.params.song_id
     }
   },
+  computed: mapState([
+    'user_id'
+  ]),
   methods: {
     getMusic () {
       window.AudioContext = window.AudioContext || window.webkitAudioContext
       const vm = this
       let context = null
       let connection = null
-      const request = new XMLHttpRequest()
+      let request = new XMLHttpRequest()
       request.responseType = 'arraybuffer'
       request.onreadystatechange = () => {
         if (request.readyState === 4) {
@@ -39,6 +42,10 @@ export default {
                 })
               }
             }
+          } else if (request.status === 500) {
+            request = null
+            alert('error occured')
+            window.location.href = '/#/musiclist'
           }
         }
       }
@@ -85,6 +92,7 @@ export default {
     }
   },
   created () {
+    this.$store.dispatch('loggedin')
     this.getMusic()
   }
 }

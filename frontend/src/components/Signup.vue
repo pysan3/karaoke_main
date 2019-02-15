@@ -17,12 +17,13 @@
 
 <script>
 import axios from 'axios'
+import * as types from '@/store/mutation-types'
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
       user_name: '',
-      user_password: '',
-      user_id: -1
+      user_password: ''
     }
   },
   methods: {
@@ -36,17 +37,21 @@ export default {
         user_password: this.user_password
       })
         .then(response => {
-          if ((this.user_id = response.data.user_id) !== -1) {
-            window.location.href = '/'
-          } else if (this.user_name.length !== 0) {
-            alert(response.data.msg)
+          const responseId = response.data.user_id - 0
+          alert(response.data.msg)
+          if (responseId !== -1) {
+            this.$store.commit(types.USER_ID, responseId)
+            window.location.href = '/#/user'
           }
         })
         .catch(error => {
           console.log(error)
         })
     }
-  }
+  },
+  computed: mapState([
+    'user_id'
+  ])
 }
 </script>
 

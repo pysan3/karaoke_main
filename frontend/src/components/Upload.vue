@@ -1,12 +1,9 @@
 <template>
   <div>
-  <!-- <div v-if="!music"> -->
     <h2>Select an music</h2>
       <input @change="onFileChange" type="file" name="file" accept="audio/*" capture="microphone">
       <audio id="player" controls></audio>
     <div id="byte_content"></div>
-  <!-- </div>
-  <div v-else> -->
     <h2>data of music</h2>
     <h3>music name</h3>
     <button @click="getRandom">New random number</button>
@@ -16,27 +13,23 @@
     <input type="text" placeholder="name of singer" v-model="singer">
     <button id="btn" @click="upload">upload music</button>
     <br>
-    <p>
-      <router-link to="/musiclist">sing now</router-link>
-    </p>
-    <br>
-    {{ song_id }}
-  <!-- </div> -->
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
-      user_id: 100,
-      song_id: -1,
       song_name: 'hoge',
       singer: 'fhana',
       uploadFile: null
     }
   },
+  computed: mapState([
+    'user_id'
+  ]),
   methods: {
     onFileChange (e) {
       e.preventDefault()
@@ -46,6 +39,10 @@ export default {
       this.uploadFile = file
     },
     upload () {
+      if (this.song_name.length && this.singer.length) {
+        alert('name should be longer than one letter')
+        return
+      }
       const formData = new FormData()
       formData.append('user_id', this.user_id)
       formData.append('song_name', this.song_name)
@@ -58,8 +55,7 @@ export default {
       }
       axios.post('http://localhost:5042/api/upload', formData, config)
         .then(response => {
-          this.song_id = response.data.song_id
-          document.location = '/#/musiclist'
+          document.location = '/#/sing/' + response.data.song_id
         })
         .catch(error => {
           console.log(error)
@@ -75,6 +71,9 @@ export default {
           console.log(error)
         })
     }
+  },
+  created () {
+    this.$store.dispatch('loggedin')
   }
 }
 </script>
