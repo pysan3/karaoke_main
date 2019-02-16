@@ -1,17 +1,15 @@
 <template>
-  <div class="login">
-    <p>LOGIN</p>
-    <h2>log in</h2>
+  <div>
+    <h2>{{ accessType }}</h2>
     <input type="text" placeholder="Username" v-model="user_name">
     <input type="password" placeholder="Password" v-model="user_password">
-    <button @click="tryLogin">Register</button>
-    <p>Do you have an account?
-      <router-link to="/signup">sign up now!!</router-link>
+    <button @click="tryAccess">{{ accessType }}!!</button>
+    <p>{{ msg }}
+      <button @click="accessOpposite">{{ opposite }}</button>
     </p>
-    <p>login succeeded {{ isFound }}</p>
-    <p>login user_id {{ user_id }}</p>
-    <p>login user_name {{ user_name }}</p>
-    <p>login msg {{ msg }}</p>
+    <p>signup user_name {{ user_name }}</p>
+    <p>signup password {{ user_password }}</p>
+    <p>signup result {{ msg }}</p>
   </div>
 </template>
 
@@ -22,36 +20,56 @@ import { mapState } from 'vuex'
 export default {
   data () {
     return {
+      accessType: this.$route.params.accessType,
       user_name: '',
-      user_password: ''
+      user_password: '',
+      msg: '',
+      opposite: ''
     }
   },
+  computed: mapState([
+    'user_id'
+  ]),
   methods: {
-    tryLogin () {
+    tryAccess () {
       if (this.user_name.length * this.user_password.length === 0) {
         alert('should not be zero charactors')
         return
       }
-      axios.post('http://localhost:5042/api/login', {
+      axios.post('http://localhost:5042/api/' + this.accessType, {
         user_name: this.user_name,
         user_password: this.user_password
       })
         .then(response => {
           const responseId = response.data.user_id - 0
-          alert(response.data.msg)
           if (responseId !== -1) {
             this.$store.commit(types.USER_ID, responseId)
             window.location.href = '/#/user'
+          } else {
+            alert(response.data.msg)
           }
         })
         .catch(error => {
           console.log(error)
         })
+    },
+    accessOpposite () {
+      [this.accessType, this.opposite] = [this.opposite, this.accessType]
+      window.location.href = '/#/tryaccess/' + this.accessType
     }
   },
-  computed: mapState([
-    'user_id'
-  ])
+  created () {
+    if (this.accessType === 'login') {
+      this.msg = 'make a new account'
+      this.opposite = 'signup'
+    } else if (this.accessType === 'signup') {
+      this.msg = 'already have an account'
+      this.opposite = 'login'
+    } else {
+      alert('url broken')
+      window.location.href = '/'
+    }
+  }
 }
 </script>
 
@@ -70,7 +88,7 @@ li {
 a {
   color: #42b983;
 }
-.login {
+.signup {
   margin-top: 20px;
 
   display: flex;
