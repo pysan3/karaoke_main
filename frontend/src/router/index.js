@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import axios from 'axios'
+import { ClientTable } from 'vue-tables-2'
 
 const routerOptions = [
   { path: '/', component: 'Home' },
@@ -21,6 +23,8 @@ const routes = routerOptions.map(route => {
 })
 
 Vue.use(Router)
+Vue.use(axios)
+Vue.use(ClientTable)
 
 export default new Router({
   routes,

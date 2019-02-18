@@ -1,3 +1,4 @@
+@echo off
 cd frontend
-npm build run
+npm run build
 cd ../

@@ -42,7 +42,7 @@ def Savespec(y_mix, y_inst, fname):
         stft(y_mix, n_fft=C.FFT_SIZE, hop_length=C.H)).astype(np.float32)
     S_inst = np.abs(
         stft(y_inst, n_fft=C.FFT_SIZE, hop_length=C.H)).astype(np.float32)
-    S_vocal = np.maximum(0, S_mix - S_inst)
+    S_vocal = np.maximum(S_mix - S_inst, 0)
     # y_vocal = istft(S_vocal*phase, hop_length=C.H, win_length=C.FFT_SIZE)
     # write_wav(os.path.join("Audiocheck", fname+".wav"), y_vocal, C.SR)
     norm = S_mix.max()

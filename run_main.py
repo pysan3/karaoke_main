@@ -3,6 +3,7 @@ import sqlite3
 
 import os
 import sys
+import json
 import io
 import cgi
 from random import randint
@@ -82,11 +83,12 @@ async def signup(req, resp):
 async def musiclist(req, resp):
     f_index = functions.index(sys._getframe().f_code.co_name)
     result = backapp.music_list()
-    # {'id':number, 'name':'song_name', 'singer':'singer_name'}
+    # {id : {'name':'song_name', 'singer':'singer_name'}}
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
         'success', f_index, 0, '', 'list of musics'
     ))
-    resp.media = result
+    print(json.dumps(result))
+    resp.media = json.dumps(result)
 
 @api.route('/api/upload')
 async def upload(req, resp):
