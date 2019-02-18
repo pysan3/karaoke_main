@@ -91,24 +91,6 @@ def add_music(name, singer):
     session.close()
     return song_id
 
-class WebSocketApp:
-    def __init__(self):
-        self.data = []
-        self.counter = 0
-        self.max_index = 0
-    def upload(self, data):
-        self.data.append((np.frombuffer(data, dtype='float32') * 32767).astype(np.int16))
-        self.counter += 1
-    def return_counter(self):
-        return self.counter
-    def close(self, data):
-        v = np.array(self.data).flatten()
-        with wave.Wave_write('hoge.wav') as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(data['framerate'])
-            wf.writeframes(v.tobytes('C'))
-
 def create_logger(filename):
     logger = logging.getLogger(filename)
     fmt = '%(name)s %(levelno)s %(funcName)s %(message)s'
@@ -122,3 +104,26 @@ def create_logger(filename):
     logger.addHandler(sqlite_handler)
     logger.propagate = False
     return logger
+
+class WebSocketApp:
+    def __init__(self):
+        self.data = []
+        self.stream_data = []
+        self.counter = 0
+
+    def upload(self, stream):
+        self.counter += 1
+        self.data.append((np.frombuffer(stream, dtype='float32') * 32767).astype(np.int16))
+        
+        self.stream_data.append((np.frombuffer(stream, dtype='float32')).tolist())
+
+    def return_counter(self):
+        return self.counter
+
+    def close(self, info):
+        v = np.array(self.data).flatten()
+        with wave.Wave_write('hoge.wav') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(info['framerate'])
+            wf.writeframes(v.tobytes('C'))

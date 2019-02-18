@@ -8,8 +8,8 @@ import io
 import cgi
 from random import randint
 
-import app as backapp
-import music as backmusic
+import app.app as backapp
+import audio.music as backmusic
 
 api = responder.API(templates_dir='./dist', static_dir='./dist/static')
 api.add_route(websocket=True)
@@ -132,7 +132,7 @@ async def ws_sing(ws):
             ws_handler.close(data)
             break
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
-        'ws connection completed', f_index, data['user_id'], '_', '_'
+        'ws connection completed', f_index, data['user_id'], ws_handler.return_counter(), 1
     ))
 
 @api.route('/api/random')
