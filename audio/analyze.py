@@ -33,14 +33,3 @@ def peaks_to_landmarks(peaks_freq,peaks_time):
             hsh = (((pfreq & 255)<<12) | (((pfreq_target+30-pfreq)&63)<<6)|(dtime&63))
             list_landmarks.append((hsh,ptime))   #ハッシュとピーク1の時間を保存
     return list_landmarks
-
-def main():
-    with open('/audio/data.txt', 'r') as f:
-        data = [[float(i) for i in j.split(', ')] for j in f.read()[2:-2].split('], [')]
-    peaks_freq, peaks_time = find_peaks(np.array(data).flatten())
-    for i in range(len(peaks_freq)):
-        print(data[peaks_freq[i]][peaks_time[i]])
-
-
-if __name__ == '__main__':
-    main()
