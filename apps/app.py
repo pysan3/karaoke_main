@@ -1,20 +1,9 @@
 import numpy as np
-import wave
 import logging
 import hashlib
 from datetime import datetime
 
-from database import Session, Eventlogs, Eventnames, Users, Musics, SQLiteHandler
-
-def create_eventnames(funcs):
-    session = Session()
-    names =  session.query(Eventnames).all()
-    if len(names) == 0:
-        for func in funcs:
-            session.add(Eventnames(event_name=func))
-    session.commit()
-    session.close()
-    print('DONE: init db')
+from apps.database import Session, Eventlogs, Eventnames, Users, Musics, SQLiteHandler
 
 def login(data):
     session = Session()
@@ -59,9 +48,7 @@ def logged_in(user_id):
     result = session.query(Eventlogs).filter_by(user_id=user_id).all()
     event_name_logout = session.query(Eventnames).filter_by(event_name='logout').one().id
     session.close()
-    if len(result) == 0:
-        return 0
-    elif result[-1].event_id == event_name_logout:
+    if len(result) == 0 or result[-1].event_id == event_name_logout:
         return 0
     else:
         return 1
@@ -105,25 +92,17 @@ def create_logger(filename):
     logger.propagate = False
     return logger
 
-class WebSocketApp:
-    def __init__(self):
-        self.data = []
-        self.stream_data = []
-        self.counter = 0
-
-    def upload(self, stream):
-        self.counter += 1
-        self.data.append((np.frombuffer(stream, dtype='float32') * 32767).astype(np.int16))
-        
-        self.stream_data.append((np.frombuffer(stream, dtype='float32')).tolist())
-
-    def return_counter(self):
-        return self.counter
-
-    def close(self, info):
-        v = np.array(self.data).flatten()
-        with wave.Wave_write('hoge.wav') as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(info['framerate'])
-            wf.writeframes(v.tobytes('C'))
+def init_db():
+    session = Session()
+    session.add(Users(
+        user_name='master',
+        user_password='password',
+        created_at=datetime.now().isoformat(' ', 'seconds'),
+    ))
+    session.add(Musics(
+        song_name='wonder stella',
+        singer='fhana',
+        created_at=datetime.now().isoformat(' ', 'seconds'),
+    ))
+    session.commit()
+    session.close()

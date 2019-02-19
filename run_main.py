@@ -8,7 +8,7 @@ import io
 import cgi
 from random import randint
 
-import app.app as backapp
+import apps.app as backapp
 import audio.music as backmusic
 
 api = responder.API(templates_dir='./dist', static_dir='./dist/static')
@@ -122,7 +122,7 @@ async def load_music(req, resp, *, req_id):
 @api.route('/ws/sing', websocket=True)
 async def ws_sing(ws):
     f_index = functions.index(sys._getframe().f_code.co_name)
-    ws_handler = backapp.WebSocketApp()
+    ws_handler = backmusic.WebSocketApp()
     await ws.accept()
     data = await ws.receive_json()
     while True:
@@ -145,5 +145,4 @@ def random_number(req, resp):
     resp.media = result
 
 if __name__ == '__main__':
-    backapp.create_eventnames(functions)
     api.run()

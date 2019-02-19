@@ -1,13 +1,8 @@
+import numpy as np
+import wave
 from glob import glob
 
-import numpy as np
-from chainer import config
-from librosa.core import stft, load, istft
-from librosa.output import write_wav
-import os.path
-
-import network
-import const as C
+from audio import analyze, network
 
 def load_music(song_id):
     if song_id in [s[10:-4] for s in glob('audio/wav/*.wav')]:
@@ -17,50 +12,29 @@ def load_music(song_id):
         return False
 
 def upload(song_id, data):
+    # TODO: format data
     with open('audio/wav/{0}.wav'.format(song_id), 'wb') as f:
         f.write(data)
+    analyze.create_hash(data[44:])
 
-def LoadAudio(fname):
-    y, _ = load(fname, sr=C.SR)
-    spec = stft(y, n_fft=C.FFT_SIZE, hop_length=C.H, win_length=C.FFT_SIZE)
-    mag = np.abs(spec)
-    mag /= np.max(mag)
-    phase = np.exp(1.j*np.angle(spec))
-    return mag, phase
+class WebSocketApp:
+    def __init__(self):
+        self.data = []
+        self.stream_data = []
+        self.counter = 0
 
-def SaveAudio(fname, mag, phase):
-    y = istft(mag*phase, hop_length=C.H, win_length=C.FFT_SIZE)
-    write_wav(fname, y, C.SR, norm=True)
+    def upload(self, stream):
+        self.counter += 1
+        self.data.append((np.frombuffer(stream, dtype='float32') * 32767).astype(np.int16))
+        self.stream_data.append((np.frombuffer(stream, dtype='float32')).tolist())
 
-def ComputeMask(input_mag, unet_model="unet.model", hard=True):
-    unet = network.UNet()
-    unet.load(unet_model)
-    config.train = False
-    config.enable_backprop = False
-    mask = unet(input_mag[np.newaxis, np.newaxis, 1:, :]).data[0, 0, :, :]
-    mask = np.vstack((np.zeros(mask.shape[1], dtype="float32"), mask))
-    if hard:
-        hard_mask = np.zeros(mask.shape, dtype="float32")
-        hard_mask[mask > 0.5] = 1
-        return hard_mask
-    else:
-        return mask
+    def return_counter(self):
+        return self.counter
 
-def receive_stream(stream):
-    mag, phase = LoadAudio(fname)
-    start
-
-folder = './wav/'
-fname = "original_mix.wav"
-mag, phase = LoadAudio(folder + fname)
-start = 1024
-end = 1024+1024
-
-mask = ComputeMask(mag[:, start:end], unet_model="unet.model", hard=False)
-
-SaveAudio(
-    folder + "vocal-%s" % fname, mag[:, start:end]*mask, phase[:, start:end])
-SaveAudio(
-    folder + "inst-%s" % fname, mag[:, start:end]*(1-mask), phase[:, start:end])
-SaveAudio(
-    folder + "orig-%s" % fname, mag[:, start:end], phase[:, start:end])
+    def close(self, info):
+        v = np.array(self.data).flatten()
+        with wave.Wave_write('hoge.wav') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(info['framerate'])
+            wf.writeframes(v.tobytes('C'))

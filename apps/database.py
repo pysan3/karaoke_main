@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 __version__ = "0.1.0"
 
-engine = create_engine('sqlite:///database.sqlite3', echo=False)
+engine = create_engine('sqlite:///apps/database.sqlite3', echo=False)
 Base = declarative_base()
 
 Session = sessionmaker(bind=engine)

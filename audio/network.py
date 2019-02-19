@@ -1,7 +1,15 @@
+import numpy as np
 from chainer import Chain, serializers, optimizers, config
 import chainer.links as L
 import chainer.functions as F
-import numpy as np
+from librosa.core import load, stft, istft
+from librosa.output import write_wav
+
+SR = 16000
+H = 512
+FFT_SIZE = 1024
+BATCH_SIZE = 64
+PATCH_LENGTH = 128
 
 class UNet(Chain):
     def __init__(self):
@@ -48,3 +56,35 @@ class UNet(Chain):
 
     def load(self, fname="unet.model"):
         serializers.load_npz(fname, self)
+
+def LoadAudio(fname):
+    y, _ = load(fname, sr=SR)
+    spec = stft(y, n_fft=FFT_SIZE, hop_length=H, win_length=FFT_SIZE)
+    mag = np.abs(spec)
+    mag /= np.max(mag)
+    phase = np.exp(1.j*np.angle(spec))
+    return mag, phase
+
+def ComputeMask(input_mag, unet_model="unet.model"):
+    unet = UNet()
+    unet.load(unet_model)
+    config.train = False
+    config.enable_backprop = False
+    mask = unet(input_mag[np.newaxis, np.newaxis, 1:, :]).data[0, 0, :, :]
+    mask = np.vstack((np.zeros(mask.shape[1], dtype="float32"), mask))
+    return mask
+
+def SaveAudio(fname, mag, phase):
+    y = istft(mag*phase, hop_length=H, win_length=FFT_SIZE)
+    write_wav(fname, y, SR, norm=True)
+
+def main():
+    folder = './wav/'
+    fname = "original_mix.wav"
+    mag, phase = LoadAudio(folder + fname)
+    start = 1024
+    end = 1024+1024
+    mask = ComputeMask(mag[:, start:end], unet_model="unet.model")
+    SaveAudio(folder + "vocal-%s" % fname, mag[:, start:end]*mask, phase[:, start:end])
+    SaveAudio(folder + "inst-%s" % fname, mag[:, start:end]*(1-mask), phase[:, start:end])
+    SaveAudio(folder + "orig-%s" % fname, mag[:, start:end], phase[:, start:end])
