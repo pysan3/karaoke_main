@@ -9,7 +9,7 @@ import sox
 from audio import analyze, network
 
 def load_music(song_id):
-    if song_id in [s[10:-4] for s in glob('./audio/wav/*.wav')]:
+    if song_id in [s[12:-4] for s in glob('./audio/wav/*.wav')]:
         with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
             return f.read()
     else:
@@ -23,14 +23,13 @@ def upload(song_id, data, ftype):
     tfm.set_output_format(file_type='wav', rate=48000, bits=16, channels=1)
     tfm.build('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), './audio/wav/{0}.wav'.format(song_id))
     with open('{0}.wav'.format(song_id), 'rb') as f:
-        data = f.read()
+        data = np.frombuffer(f.read()[44:], dtype='int16')
     sampwidth = int.from_bytes(data[34:36], byteorder='little') // 8
     nchannels = int.from_bytes(data[22:24], byteorder='little')
     framerate = int.from_bytes(data[24:28], byteorder='little')
     print(sampwidth, nchannels, framerate)
     os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
     # => [(hsh, start_time), ...]
-    return 1
     return create_hash(data)
 
 def create_hash(data):
