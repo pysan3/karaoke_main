@@ -11,6 +11,8 @@
     <input type="text" placeholder="music name" v-model="song_title">
     <h3>singer name</h3>
     <input type="text" placeholder="name of singer" v-model="singer">
+    <h3>uplead data type</h3>
+    <h2>.{{ file_type }}</h2>
     <button id="btn" @click="upload">upload music</button>
     <br>
   </div>
@@ -24,6 +26,7 @@ export default {
     return {
       song_title: 'hoge',
       singer: 'fhana',
+      file_type: '',
       uploadFile: null
     }
   },
@@ -36,7 +39,13 @@ export default {
       const file = e.target.files[0]
       const player = document.getElementById('player')
       player.src = URL.createObjectURL(file)
-      this.song_title = file.name
+      let fname = file.name.split('.')
+      if (fname.length !== 0) {
+        let ftype = fname[fname.length - 1]
+        fname = fname.slice(0, -1 - ftype.length)
+        this.song_title = fname
+        this.file_type = ftype
+      }
       this.uploadFile = file
     },
     upload () {
@@ -48,6 +57,7 @@ export default {
       formData.append('user_id', this.user_id)
       formData.append('song_title', this.song_title)
       formData.append('singer', this.singer)
+      formData.append('file_type', this.file_type)
       formData.append('music', this.uploadFile)
       const config = {
         headers: {

@@ -95,15 +95,15 @@ async def upload(req, resp):
     # TODO: return False if music already exists
     f_index = functions.index(sys._getframe().f_code.co_name)
     data = cgi.FieldStorage(fp=io.BytesIO(await req.content), environ={'REQUEST_METHOD': 'POST'}, headers=req.headers).list
-    # ['user_id', 'song_title', 'singer', 'data']
+    # ['user_id', 'song_title', 'singer', 'file_type', 'data']
     song_id = backapp.add_music(data[1].value, data[2].value)
     if song_id != -1:
         @api.background.task
-        def music_upload(song_id, data):
-            hash_table = backmusic.upload(song_id, data)
+        def music_upload(song_id, data, ftype):
+            hash_table = backmusic.upload(song_id, data, ftype)
             print(hash_table)
-            backapp.add_music(song_id, hash_table)
-        music_upload(song_id, data[3].value)
+            # backapp.add_music(song_id, hash_table)
+        music_upload(song_id, data[4].value, data[3].value)
         logger.info('{0}@_@{1} {2} {3} {4}'.format(
             'music upload', f_index, data[0].value, song_id, 1
         ))

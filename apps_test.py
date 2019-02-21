@@ -26,16 +26,3 @@ def create_eventnames():
 
 create_new_database()
 create_eventnames()
-print('DONE: init db')
-
-# 'takuto' + 'itoi' == 'takutoitoi'
-# print('takuto', 'itoi')
-# print(str(i) + ' is not a leap year')
-# print('{0} is not a leap year'.format(i))
-# print(i, 'is not a leap year')
-
-# for i in range(int(input())):
-#     print(i, 'is', end='')
-#     if i % 400 != 0 and i % 100 == 0 or i % 4 != 0:
-#         print('not')
-#     print(' a leap year')
