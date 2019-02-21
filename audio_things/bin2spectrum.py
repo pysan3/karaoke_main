@@ -21,7 +21,7 @@ class Spectrum:
             if len(frame) == self.fp:
                 windowedData = self.window * frame
                 fft_result = np.fft.rfft(windowedData)
-                fft_data = np.log(np.abs(fft_result) ** 2)
+                fft_data = np.log(np.abs(fft_result)) * 2
                 self.mono[i//self.fp] = fft_data[::-1]
 
     def len_mono(self):

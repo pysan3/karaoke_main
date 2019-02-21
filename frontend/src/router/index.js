@@ -11,7 +11,7 @@ const routerOptions = [
   { path: '/tryaccess/:accessType', component: 'TryAccess' },
   { path: '/musiclist', component: 'MusicList' },
   { path: '/musicupload', component: 'Upload' },
-  { path: '/sing/:song_id', component: 'Sing' },
+  { path: '/sing/:song_id', name: 'singmusic', component: 'Sing' },
   { path: '*', component: 'NotFound' }
 ]
 

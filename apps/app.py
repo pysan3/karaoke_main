@@ -59,24 +59,29 @@ def music_list():
     session.close()
     result = []
     for song in songs:
-        result.append([song.id, song.song_name, song.singer])
+        result.append([song.id, song.song_title, song.singer])
     return result
+
+def isExist(name, singer):
+    session = Session()
+    song = session.query(Musics).filter_by(song_title=name, singer=singer).all()
+    session.close()
+    return len(song) != 0
 
 def add_music(name, singer):
     session = Session()
-    song = session.query(Musics).filter_by(song_name=name, singer=singer).all()
-    if len(song) != 0:
-        print('another song found')
-        return -1
     song_id = session.query(Musics).count() + 1
     session.add(Musics(
-        song_name=name,
+        song_title=name,
         singer=singer,
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.commit()
     session.close()
     return song_id
+
+def upload_hash(song_id, hash_table):
+    pass
 
 def create_logger(filename):
     logger = logging.getLogger(filename)
@@ -100,7 +105,7 @@ def init_db():
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.add(Musics(
-        song_name='wonder stella',
+        song_title='wonder stella',
         singer='fhana',
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))

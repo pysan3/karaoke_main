@@ -52,13 +52,24 @@ class Users(Base):
 class Musics(Base):
     __tablename__ = 'musics'
     id = Column('id', Integer, primary_key=True)
-    song_name = Column('song_name', String)
+    song_title = Column('song_title', String)
     singer = Column('singer', String)
     created_at = Column('created_at', String)
+    hsh = Column('hsh', String)
 
     def __repr__(self):
-        return '<Musics(id=%s, song_name=%s, singer=%s, created_at=%s, )>' \
-            % (self.id, self.song_name, self.singer, self.created_at)
+        return '<Musics(id=%s, song_title=%s, singer=%s, created_at=%s, hsh=%s, )>' \
+            % (self.id, self.song_title, self.singer, self.created_at, self.hsh)
+
+class Hsh(Base):
+    __tablename__ = 'hsh'
+    id = Column('id', Integer, primary_key=True)
+    song_id = Column('song_id', Integer)
+    hsh_data = Column('hsh_data', String)
+
+    def __repr__(self):
+        return '<Hsh(id=%s, song_id=%s, hsh_data=%s, )>' \
+            % (self.id, self.song_id, self.hsh_data)
 
 class SQLiteHandler(logging.Handler):
     def __init__(self):
@@ -108,7 +119,7 @@ if __name__ == '__main__':
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))
     session.add(Musics(
-        song_name='wonder stella',
+        song_title='wonder stella',
         singer='fhana',
         created_at=datetime.now().isoformat(' ', 'seconds'),
     ))

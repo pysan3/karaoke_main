@@ -64,14 +64,14 @@ export default {
                 clearInterval(interval)
                 connection.close()
                 connection = null
-                window.location.href = '/'
+                window.location.href = '/#/user'
               }
             }
             stream = null
             let interval = setInterval(isDone, 1000)
           }
-          src.start(0)
           handleSuccess(stream)
+          src.start(0)
         })
       }
       const handleSuccess = stream => {

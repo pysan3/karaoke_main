@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect('./app/database.sqlite3')
+conn = sqlite3.connect('./apps/database.sqlite3')
 res = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
 cur = conn.cursor()
 for name in res:

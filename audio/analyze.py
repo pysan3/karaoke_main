@@ -1,35 +1,25 @@
 import wave
 import numpy as np
 import scipy.ndimage as ndi
-import scipy.ndimage.morphology as mor
 from librosa.core import stft
 
-def create_hash(data):
-    pass
-
-def find_peaks(y):
-    sgram = np.array(np.abs(stft(y, n_fft=512, hop_length=256)))
-    sgram = np.where(sgram==0, 0, 10 * np.log(sgram))
-    neighborhood = mor.iterate_structure(mor.generate_binary_structure(2, 1), 20)
+def find_peaks(data):
+    sgram = np.abs(stft(data, n_fft=1024, window='hamming'))
+    neighborhood = ndi.morphology.iterate_structure(ndi.morphology.generate_binary_structure(2, 1), 20)
     sgram_max = ndi.maximum_filter(sgram, footprint=neighborhood, mode='constant')
-    maxima = (sgram==sgram_max) & (sgram > 0.2)
-    peaks_freq, peaks_time = np.asarray(maxima).nonzero()
-    print(peaks_freq, peaks_time)
-    return peaks_freq, peaks_time
+    # => (peaks_freq, peaks_time)
+    return np.asarray((sgram==sgram_max) & (sgram > 0.2)).nonzero()
 
-def peaks_to_landmarks(peaks_freq,peaks_time):
-    peak_mat = np.zeros((np.max(peaks_freq)+30,np.max(peaks_time)+60),dtype=np.bool)
-    peak_mat[peaks_freq,peaks_time] = True
+def peaks_to_landmarks(peaks_freq, peaks_time):
+    peak_mat = np.zeros((np.max(peaks_freq)+30, np.max(peaks_time)+260), dtype=np.bool)
+    peak_mat[peaks_freq, peaks_time] = True
     list_landmarks = []
-    for pfreq,ptime in zip(peaks_freq,peaks_time):
-        #(pfreq,ptime) -- current anchor
-        target_mask = np.zeros(peak_mat.shape,dtype=np.bool)
-        target_mask[pfreq-30 : pfreq+30, ptime+30 : 60] = 1
-        #target_mask:target peakを選ぶ範囲を指定する
+    for pfreq, ptime in zip(peaks_freq, peaks_time):
+        target_mask = np.zeros(peak_mat.shape, dtype=np.bool)
+        target_mask[(pfreq-30 if pfreq < 30 else 0) : pfreq+30, ptime+20 : ptime+260] = True
         targets_freq, targets_time = np.asarray(peak_mat & target_mask).nonzero()
-        for pfreq_target,ptime_target in zip(targets_freq, targets_time):
-            dtime = ptime_target-ptime
-            #ハッシュを構築
-            hsh = (((pfreq & 255)<<12) | (((pfreq_target+30-pfreq)&63)<<6)|(dtime&63))
-            list_landmarks.append((hsh,ptime))   #ハッシュとピーク1の時間を保存
+        for pfreq_target, ptime_target in zip(targets_freq, targets_time):
+            dtime = ptime_target - ptime
+            hsh = (((pfreq & 511)<<12) | ((pfreq_target&63)<<6) | (dtime&63))
+            list_landmarks.append((hsh, ptime))
     return list_landmarks

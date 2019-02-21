@@ -8,6 +8,11 @@
     </v-client-table> -->
     <br>
     <!-- <button @click="updateTable">here</button> -->
+    <ul>
+      <li v-for="item in mList" v-bind:key="item.id">
+        <router-link v-bind:to="{name: 'singmusic', params: { song_id: item.song_id }}">{{ item.name }} {{ item.singer }}</router-link>
+      </li>
+    </ul>
     <button @click="debugFunctionforDebugging">here</button>
     <router-link to="/musicupload">music upload</router-link>
   </div>

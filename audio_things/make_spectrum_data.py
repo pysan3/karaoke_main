@@ -40,7 +40,6 @@ def main():
     filenames = glob.glob("./wav/*.wav")
     for filename in filenames:
         dataname = filename[6:-4]
-        print("")
         print(dataname)
         spec_data = makeSpectrogram(dataname)
         writeText(spec_data, dataname)

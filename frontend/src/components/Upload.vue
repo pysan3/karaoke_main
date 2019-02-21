@@ -8,7 +8,7 @@
     <h3>music name</h3>
     <button @click="getRandom">New random number</button>
     <br>
-    <input type="text" placeholder="music name" v-model="song_name">
+    <input type="text" placeholder="music name" v-model="song_title">
     <h3>singer name</h3>
     <input type="text" placeholder="name of singer" v-model="singer">
     <button id="btn" @click="upload">upload music</button>
@@ -22,7 +22,7 @@ import { mapState } from 'vuex'
 export default {
   data () {
     return {
-      song_name: 'hoge',
+      song_title: 'hoge',
       singer: 'fhana',
       uploadFile: null
     }
@@ -36,16 +36,17 @@ export default {
       const file = e.target.files[0]
       const player = document.getElementById('player')
       player.src = URL.createObjectURL(file)
+      this.song_title = file.name
       this.uploadFile = file
     },
     upload () {
-      if (this.song_name.length && this.singer.length) {
+      if (this.song_title.length && this.singer.length) {
         alert('name should be longer than one letter')
         return
       }
       const formData = new FormData()
       formData.append('user_id', this.user_id)
-      formData.append('song_name', this.song_name)
+      formData.append('song_title', this.song_title)
       formData.append('singer', this.singer)
       formData.append('music', this.uploadFile)
       const config = {
@@ -65,7 +66,7 @@ export default {
       const path = 'http://localhost:5042/api/random'
       axios.get(path)
         .then(response => {
-          this.song_name = response.data.randomNumber
+          this.song_title = response.data.randomNumber
         })
         .catch(error => {
           console.log(error)

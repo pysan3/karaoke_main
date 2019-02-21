@@ -83,7 +83,7 @@ async def signup(req, resp):
 async def musiclist(req, resp):
     f_index = functions.index(sys._getframe().f_code.co_name)
     result = backapp.music_list()
-    # {id : {'name':'song_name', 'singer':'singer_name'}}
+    # {id : {'name':'song_title', 'singer':'singer_name'}}
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
         'success', f_index, 0, '', 'list of musics'
     ))
@@ -92,15 +92,20 @@ async def musiclist(req, resp):
 
 @api.route('/api/upload')
 async def upload(req, resp):
+    # TODO: return False if music already exists
     f_index = functions.index(sys._getframe().f_code.co_name)
-    data = cgi.FieldStorage(fp=io.BytesIO(await req.content), environ={'REQUEST_METHOD': 'POST'}, headers=req.headers)
-    song = {d.name:d.value for d in data.list}
-    # {'user_id':number, 'song_name':name, 'singer':singer, 'music':data}
-    song_id = backapp.add_music(song['song_name'], song['singer'])
+    data = cgi.FieldStorage(fp=io.BytesIO(await req.content), environ={'REQUEST_METHOD': 'POST'}, headers=req.headers).list
+    # ['user_id', 'song_title', 'singer', 'data']
+    song_id = backapp.add_music(data[1].value, data[2].value)
     if song_id != -1:
-        backmusic.upload(song_id, song['music'])
+        @api.background.task
+        def music_upload(song_id, data):
+            hash_table = backmusic.upload(song_id, data)
+            print(hash_table)
+            backapp.add_music(song_id, hash_table)
+        music_upload(song_id, data[3].value)
         logger.info('{0}@_@{1} {2} {3} {4}'.format(
-            'music upload', f_index, song['user_id'], song_id, 1
+            'music upload', f_index, data[0].value, song_id, 1
         ))
     resp.media = {'song_id':song_id}
 
@@ -110,7 +115,7 @@ async def load_music(req, resp, *, req_id):
     user_id = req_id.split('_')[0]
     song_id = req_id.split('_')[1]
     result = backmusic.load_music(song_id)
-    # {'song_id':song.id, 'name':song.song_name, 'singer':song.singer}
+    # {'song_id':song.id, 'name':song.song_title, 'singer':song.singer}
     if result == False:
         resp.status_code = 500
         return
