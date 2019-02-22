@@ -3,7 +3,7 @@ import logging
 import hashlib
 from datetime import datetime
 
-from apps.database import Session, Eventlogs, Eventnames, Users, Musics, SQLiteHandler
+from apps.database import Session, Eventlogs, Eventnames, Users, Musics, Hsh, SQLiteHandler
 
 def login(data):
     session = Session()
@@ -81,7 +81,14 @@ def add_music(name, singer):
     return song_id
 
 def upload_hash(song_id, hash_table):
-    pass
+    # TODO: format table?
+    session = Session()
+    session.add(Hsh(
+        song_id=song_id,
+        hsh_data=hash_table
+    ))
+    session.commit()
+    session.close()
 
 def create_logger(filename):
     logger = logging.getLogger(filename)

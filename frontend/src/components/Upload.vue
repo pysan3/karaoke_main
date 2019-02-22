@@ -11,8 +11,8 @@
     <input type="text" placeholder="music name" v-model="song_title">
     <h3>singer name</h3>
     <input type="text" placeholder="name of singer" v-model="singer">
-    <h3>uplead data type</h3>
-    <h2>.{{ file_type }}</h2>
+    <h3>upload data type</h3>
+    <input type="text" placeholder="file type" v-model="file_type">
     <button id="btn" @click="upload">upload music</button>
     <br>
   </div>

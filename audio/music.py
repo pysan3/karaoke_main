@@ -22,13 +22,9 @@ def upload(song_id, data, ftype):
     tfm = sox.Transformer()
     tfm.set_output_format(file_type='wav', rate=48000, bits=16, channels=1)
     tfm.build('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), './audio/wav/{0}.wav'.format(song_id))
+    os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
     with open('{0}.wav'.format(song_id), 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16')
-    sampwidth = int.from_bytes(data[34:36], byteorder='little') // 8
-    nchannels = int.from_bytes(data[22:24], byteorder='little')
-    framerate = int.from_bytes(data[24:28], byteorder='little')
-    print(sampwidth, nchannels, framerate)
-    os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
     # => [(hsh, start_time), ...]
     return create_hash(data)
 
