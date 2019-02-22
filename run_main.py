@@ -129,9 +129,9 @@ async def load_music(req, resp, *, req_id):
 @api.route('/ws/sing', websocket=True)
 async def ws_sing(ws):
     f_index = functions.index(sys._getframe().f_code.co_name)
-    ws_handler = backmusic.WebSocketApp()
     await ws.accept()
     data = await ws.receive_json()
+    ws_handler = backmusic.WebSocketApp(backapp.hashtable(data['song_id']))
     while True:
         try:
             ws_handler.upload(await ws.receive_bytes())

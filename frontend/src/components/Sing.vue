@@ -35,6 +35,7 @@ export default {
               connection.onopen = e => {
                 connection.send(JSON.stringify({
                   user_id: vm.user_id,
+                  song_id: vm.song_id,
                   framerate: context.sampleRate
                 }))
                 p.then(buffer => {

@@ -34,10 +34,12 @@ def create_hash(data):
     # => list_hsh, list_ptime (both in str)
 
 class WebSocketApp:
-    def __init__(self):
+    def __init__(self, tpl):
         self.data = []
         self.stream_data = []
         self.counter = 0
+        self.hsh_data = tpl[0].split()
+        self.ptime = tpl[1].split()
 
     def upload(self, stream):
         self.counter += 1
