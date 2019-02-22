@@ -66,10 +66,11 @@ class Hsh(Base):
     id = Column('id', Integer, primary_key=True)
     song_id = Column('song_id', Integer)
     hsh_data = Column('hsh_data', String)
+    ptime = Column('ptime', String)
 
     def __repr__(self):
-        return '<Hsh(id=%s, song_id=%s, hsh_data=%s, )>' \
-            % (self.id, self.song_id, self.hsh_data)
+        return '<Hsh(id=%s, song_id=%s, hsh_data=%s, ptime=%s, )>' \
+            % (self.id, self.song_id, self.hsh_data, self.ptime)
 
 class SQLiteHandler(logging.Handler):
     def __init__(self):

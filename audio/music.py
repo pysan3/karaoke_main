@@ -29,9 +29,9 @@ def upload(song_id, data, ftype):
     return create_hash(data)
 
 def create_hash(data):
-    f, t = analyze.find_peaks(np.array(data) / 32767)
-    landmarks = analyze.peaks_to_landmarks(f, t)
-    return landmarks
+    f, t = analyze.find_peaks(data.astype(float) / 32767)
+    return analyze.peaks_to_landmarks(f, t)
+    # => list_hsh, list_ptime (both in str)
 
 class WebSocketApp:
     def __init__(self):
