@@ -94,6 +94,7 @@ def upload_hash(song_id, h, t):
 def hashtable(song_id):
     session = Session()
     hsh = session.query(Hsh).filter_by(song_id=song_id).one()
+    session.close()
     return hsh.hsh_data, hsh.ptime
 
 def create_logger(filename):

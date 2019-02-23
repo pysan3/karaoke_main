@@ -24,4 +24,4 @@ def peaks_to_landmarks(peaks_freq, peaks_time):
             hsh = (((pfreq & 511)<<12) | ((pfreq_target&63)<<6) | (dtime&63))
             list_hsh += str(hsh) + ' '
             list_ptime += str(ptime) + ' '
-    return list_hsh[:-1], list_ptime[:-1], len(targets_freq)
+    return list_hsh[:-1], list_ptime[:-1]

@@ -16,7 +16,6 @@ def load_music(song_id):
         return False
 
 def upload(song_id, data, ftype):
-    # TODO: check whether wav
     with open('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), 'wb') as f:
         f.write(data)
     tfm = sox.Transformer()
@@ -25,25 +24,30 @@ def upload(song_id, data, ftype):
     os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
     with open('{0}.wav'.format(song_id), 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16')
+    return create_hash(data.astype(np.float32) / 32676)
     # => [(hsh, start_time), ...]
-    return create_hash(data)
 
 def create_hash(data):
-    f, t = analyze.find_peaks(data.astype(float) / 32767)
+    f, t = analyze.find_peaks(data)
     return analyze.peaks_to_landmarks(f, t)
     # => list_hsh, list_ptime (both in str)
 
 class WebSocketApp:
     def __init__(self, tpl):
         self.data = []
-        self.stream_data = []
         self.counter = 0
-        self.hsh_data = tpl[0].split()
-        self.ptime = tpl[1].split()
+        self.lag = 'notfound'
+        self.hsh_data = [int(i) for i in tpl[0].split()]
+        self.ptime = [int(i) for i in tpl[1].split()]
 
     def upload(self, stream):
-        self.counter += 1
         self.data.append(np.frombuffer(stream, dtype='float32'))
+        if self.lag == 'notfound':
+            self._lag_estimate(self.counter)
+        self.counter += 1
+
+    def _lag_estimate(self, counter):
+        pass
 
     def return_counter(self):
         return self.counter

@@ -100,10 +100,10 @@ async def upload(req, resp):
     if song_id != -1:
         @api.background.task
         def music_upload(song_id, data, ftype):
-            h, t, num = backmusic.upload(song_id, data, ftype)
+            h, t= backmusic.upload(song_id, data, ftype)
             backapp.upload_hash(song_id, h, t)
             logger.info('{0}@_@{1} {2} {3} {4}'.format(
-                'music hashed', f_index, 0, song_id, num
+                'music hashed', f_index, 0, song_id, len(h.split())
             ))
         music_upload(song_id, data[4].value, data[3].value)
         logger.info('{0}@_@{1} {2} {3} {4}'.format(
