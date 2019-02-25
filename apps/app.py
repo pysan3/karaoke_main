@@ -97,6 +97,12 @@ def hashtable(song_id):
     session.close()
     return hsh.hsh_data, hsh.ptime
 
+def finish_upload(song_id):
+    session = Session()
+    res = session.query(Hsh).filter_by(song_id=song_id).all()
+    session.close()
+    return len(res)
+
 def create_logger(filename):
     logger = logging.getLogger(filename)
     fmt = '%(name)s %(levelno)s %(funcName)s %(message)s'

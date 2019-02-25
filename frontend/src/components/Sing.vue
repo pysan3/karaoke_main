@@ -60,7 +60,7 @@ export default {
             stream.getTracks().forEach(track => {
               track.stop()
             })
-            function isDone () {
+            const isDone = () => {
               if (connection.bufferedAmount === 0) {
                 clearInterval(interval)
                 connection.close()
@@ -69,7 +69,7 @@ export default {
               }
             }
             stream = null
-            let interval = setInterval(isDone, 1000)
+            const interval = setInterval(isDone, 1000)
           }
           handleSuccess(stream)
           src.start(0)

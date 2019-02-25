@@ -1,9 +1,10 @@
 import numpy as np
 import scipy.ndimage as ndi
-from librosa.core import stft
 
-def find_peaks(data):
-    sgram = np.log(np.abs(stft(data, n_fft=1024, window='hamming')))
+def find_peaks(signal):
+    sgram = np.abs(stft(signal))
+    sgram = np.log(np.maximum(sgram, np.max(sgram) / 1e6))
+    sgram = sgram - np.mean(sgram)
     neighborhood = ndi.morphology.iterate_structure(ndi.morphology.generate_binary_structure(2, 1), 20)
     sgram_max = ndi.maximum_filter(sgram, footprint=neighborhood, mode='constant')
     # => (peaks_freq, peaks_time)
@@ -24,3 +25,13 @@ def peaks_to_landmarks(peaks_freq, peaks_time):
             list_hsh += str(hsh) + ' '
             list_ptime += str(ptime) + ' '
     return list_hsh[:-1], list_ptime[:-1]
+
+def stft(signal):
+    signal = np.pad(signal, 512, mode='reflect')
+    frames = np.lib.stride_tricks.as_strided(
+        signal,
+        shape=((signal.shape[0] - 1024) // 4 + 1, 1024) + signal.shape[1:],
+        strides=(signal.strides[0] * 256,) + signal.strides
+    )
+    windowed_frames = frames * np.hamming(1024)
+    return np.fft.rfft(windowed_frames, 1024).transpose()

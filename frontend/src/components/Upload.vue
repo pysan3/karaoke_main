@@ -66,7 +66,22 @@ export default {
       }
       axios.post('http://localhost:5042/api/upload', formData, config)
         .then(response => {
-          document.location = '/#/sing/' + response.data.song_id
+          const songID = response.data.song_id
+          const checkUpload = songID => {
+            axios.get('http://localhost:5042/api/isUploaded/' + songID)
+              .then(response => {
+                if (response.data.isUploaded === 1) {
+                  clearInterval(interval)
+                  document.location = '/#/sing/' + songID
+                }
+              })
+              .catch(error => {
+                console.log(error)
+              })
+          }
+          const interval = setInterval(function () {
+            checkUpload(songID)
+          }, 1000)
         })
         .catch(error => {
           console.log(error)

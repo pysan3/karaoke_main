@@ -42,7 +42,7 @@ async def login(req, resp):
     user = await req.media()
     # {'user_name': '', 'user_password': ''}
     result = backapp.login(user)
-    # {'user_id': number, 'msg': ''}
+    # {'user_id':user_id, 'msg':msg}
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
         result['msg'], f_index, result['user_id'], user['user_name'], (result['user_id'] != -1)
     ))
@@ -111,6 +111,10 @@ async def upload(req, resp):
         ))
     resp.media = {'song_id':song_id}
 
+@api.route('/api/isUploaded/{song_id}')
+async def isUploaded(req, resp, *, song_id):
+    resp.media = {'isUploaded': backapp.finish_upload(song_id)}
+
 @api.route('/audio/load_music/{req_id}')
 async def load_music(req, resp, *, req_id):
     f_index = functions.index(sys._getframe().f_code.co_name)
@@ -129,17 +133,22 @@ async def load_music(req, resp, *, req_id):
 @api.route('/ws/sing', websocket=True)
 async def ws_sing(ws):
     f_index = functions.index(sys._getframe().f_code.co_name)
+    @api.background.task
+    def lag_estimate(ws_handler):
+        ws_handler.lag_estimate()
     await ws.accept()
     data = await ws.receive_json()
     ws_handler = backmusic.WebSocketApp(backapp.hashtable(data['song_id']))
     while True:
         try:
             ws_handler.upload(await ws.receive_bytes())
+            if ws_handler.check_lag:
+                lag_estimate(ws_handler)
         except:
             ws_handler.close(data)
             break
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
-        'ws connection completed', f_index, data['user_id'], ws_handler.return_counter(), 1
+        'ws connection completed', f_index, data['user_id'], ws_handler.return_counter()[0], 1
     ))
 
 @api.route('/api/random')
