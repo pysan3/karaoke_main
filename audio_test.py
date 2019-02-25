@@ -9,10 +9,8 @@ import cProfile
 def main():
     with open('./audio/wav/2.wav', 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16')
-    lm = backmusic.create_hash(data)
-    if len(lm) == 0:
-        print('no data')
-    print(len(lm))
+    lm = backmusic.create_hash(data.astype(np.float32) / 32676)
+    print(len(lm[0].split()))
 
 pr = cProfile.Profile()
 pr.runcall(main)
