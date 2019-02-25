@@ -25,7 +25,6 @@ functions = [
     'logout',
     'musiclist',
     'upload',
-    'ws_upload',
     'load_music',
     'ws_sing'
 ]

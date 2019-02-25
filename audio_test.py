@@ -1,5 +1,6 @@
 import numpy as np
 import wave
+import matplotlib.pyplot as plt
 
 import audio.music as backmusic
 from audio import analyze
@@ -30,9 +31,33 @@ def main():
         usual_lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
         print(usual_lag)
 
+def correlate():
+    with open('audio/wav/11.wav', 'rb') as f:
+        pre = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
+    plt.subplot(2, 1, 1)
+    plt.ylabel('pre')
+    plt.plot(pre)
+    with open('hoge.wav', 'rb') as f:
+        record = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
+    plt.subplot(2, 1, 2)
+    plt.ylabel('record')
+    plt.plot(record)
+    plt.show()
+    pre = pre[:1000]
+    record = record[:1000]
+    if pre.mean():
+        print('ave not zero')
+        pre -= pre.mean()
+    if record.mean():
+        print('record ave not zero')
+        record -= record.mean()
+    corr = np.correlate(pre, record, 'full')
+    estimate_delay = corr.argmax() - len(record) + 1
+    print(estimate_delay)
 
 # pr = cProfile.Profile()
-# pr.runcall(main)
+# pr.runcall(correlate)
 # pr.print_stats()
 
-main()
+# main()
+correlate()
