@@ -55,11 +55,10 @@ class Musics(Base):
     song_title = Column('song_title', String)
     singer = Column('singer', String)
     created_at = Column('created_at', String)
-    hsh = Column('hsh', String)
 
     def __repr__(self):
-        return '<Musics(id=%s, song_title=%s, singer=%s, created_at=%s, hsh=%s, )>' \
-            % (self.id, self.song_title, self.singer, self.created_at, self.hsh)
+        return '<Musics(id=%s, song_title=%s, singer=%s, created_at=%s, )>' \
+            % (self.id, self.song_title, self.singer, self.created_at)
 
 class Hsh(Base):
     __tablename__ = 'hsh'
