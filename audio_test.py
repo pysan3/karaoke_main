@@ -8,31 +8,34 @@ from audio import analyze
 import cProfile
 
 def main():
-    with open('audio/wav/2.wav', 'rb') as f:
+    with open('audio/wav/3.wav', 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    usual_hsh_data, usual_ptime = tuple([int(i) for i in l.split()] for l in backmusic.create_hash(data))
+    usual_hsh_data, usual_ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data))
     print(len(usual_hsh_data))
     with open('hoge.wav', 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    hsh, ptime = tuple([int(i) for i in l.split()] for l in backmusic.create_hash(data[:1024*2000]))
+    hsh, ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data[:1024*2000]))
     print(len(hsh))
     lag_dict = {0:0}
     for i in range(len(hsh)):
         if hsh[i] in usual_hsh_data:
             lag = ptime[i] - usual_ptime[usual_hsh_data.index(hsh[i])]
             if lag in lag_dict.keys():
-                lag_dict[lag] = lag_dict[lag] ** 2 + 1
+                lag_dict[lag] += 1
             else:
-                lag_dict[lag] = 0
-    print(lag_dict)
-    poss_lag = max(lag_dict.values())
-    print(poss_lag)
-    if poss_lag > 0:
+                lag_dict[lag] = 1
+    print('rank : lag (possibility)')
+    poss_lag = 2
+    i = 1
+    while poss_lag != 1 and i < 10:
+        poss_lag = max(lag_dict.values())
         usual_lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
-        print(usual_lag)
+        print('   {0} : {1} ({2})'.format(i, usual_lag, poss_lag))
+        lag_dict.pop(usual_lag)
+        i += 1
 
 def correlate():
-    with open('audio/wav/2.wav', 'rb') as f:
+    with open('audio/wav/3.wav', 'rb') as f:
         pre = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
     plt.subplot(2, 1, 1)
     plt.ylabel('pre')
@@ -59,5 +62,5 @@ def correlate():
 # pr.runcall(correlate)
 # pr.print_stats()
 
-correlate()
+# correlate()
 main()

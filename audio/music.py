@@ -62,6 +62,8 @@ class WebSocketApp:
                 else:
                     lag_dict[lag] = 1
         poss_lag = max(lag_dict.values())
+        print(lag_dict)
+        print(poss_lag)
         if poss_lag > 0:
             self.lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
         else:
