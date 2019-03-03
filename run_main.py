@@ -141,10 +141,11 @@ async def ws_sing(ws):
     while True:
         try:
             ws_handler.upload(await ws.receive_bytes())
+            if ws_handler.check_lag():
+                lag_estimate(ws_handler)
         except:
             ws_handler.close(data)
             break
-    lag_estimate(ws_handler)
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
         'ws connection completed', f_index, data['user_id'], ws_handler.return_counter()[0], 1
     ))

@@ -3,8 +3,8 @@ import scipy.ndimage as ndi
 from librosa.core import stft
 
 def find_peaks(data):
-    sgram = np.abs(stft(data, n_fft=2056, window='hamming'))
-    neighborhood = ndi.morphology.iterate_structure(ndi.morphology.generate_binary_structure(2, 1), 20)
+    sgram = np.abs(stft(data, n_fft=512, window='hamming'))
+    neighborhood = ndi.morphology.iterate_structure(ndi.morphology.generate_binary_structure(2, 1), 8)
     sgram_max = ndi.maximum_filter(sgram, footprint=neighborhood, mode='constant')
     # => (peaks_freq, peaks_time)
     return np.asarray((sgram==sgram_max) & (sgram > 0.2)).nonzero()

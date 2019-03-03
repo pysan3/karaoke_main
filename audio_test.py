@@ -8,14 +8,14 @@ from audio import analyze
 import cProfile
 
 def main():
-    with open('audio/wav/3.wav', 'rb') as f:
-        data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    usual_hsh_data, usual_ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data))
-    print(len(usual_hsh_data))
     with open('hoge.wav', 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    hsh, ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data[:1024*2000]))
+    hsh, ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data[:1024*50*5]))
     print(len(hsh))
+    with open('audio/wav/3.wav', 'rb') as f:
+        data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
+    usual_hsh_data, usual_ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data[:1024*50*5]))
+    print(len(usual_hsh_data))
     lag_dict = {0:0}
     for i in range(len(hsh)):
         if hsh[i] in usual_hsh_data:

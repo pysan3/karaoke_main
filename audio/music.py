@@ -24,7 +24,7 @@ def upload(song_id, data, ftype):
     while True:
         try:
             with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
-                data = np.frombuffer(f.read()[44:], dtype='int16')
+                data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*50*5]
             break
         except:
             sleep(1)
@@ -51,27 +51,25 @@ class WebSocketApp:
 
     def lag_estimate(self):
         self.lag = 'processing'
+        hsh, ptime = tuple(list(map(int, l.split())) for l in create_hash(np.array(self.data).flatten()[:1024*50*5]))
         lag_dict = {0:0}
-        f, t = analyze.find_peaks(np.array(self.data).flatten())
-        hsh, ptime = tuple(l.split() for l in analyze.peaks_to_landmarks(f, t))
         for i in range(len(hsh)):
             if hsh[i] in self.hsh_data:
-                lag = self.ptime[self.hsh_data.index(hsh[i])] - ptime[i]
+                lag = ptime[i] - self.ptime[self.hsh_data.index(hsh[i])]
                 if lag in lag_dict.keys():
                     lag_dict[lag] += 1
                 else:
                     lag_dict[lag] = 1
         poss_lag = max(lag_dict.values())
-        print(lag_dict)
-        print(poss_lag)
         if poss_lag > 0:
             self.lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
         else:
             self.lag = 'notfound'
-        print(self.lag)
+        with open('lag.txt', mode='w') as f:
+            f.write(self.lag)
 
     def check_lag(self):
-        return (self.lag == 'notfound' and self.counter > 2000)
+        return self.counter == 50 * 5
 
     def return_counter(self):
         return self.counter, self.lag
@@ -85,3 +83,4 @@ class WebSocketApp:
             wf.writeframes(v.tobytes('C'))
         with open('hoge.txt', mode='wb') as f:
             f.write(v.tobytes('C'))
+        print(self.lag)
