@@ -60,11 +60,12 @@ class WebSocketApp:
                     lag_dict[lag] += 1
                 else:
                     lag_dict[lag] = 1
-        # poss_lag = max(lag_dict.values())
-        # if poss_lag > 0:
-        #     self.lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
-        # else:
-        #     self.lag = 'notfound'
+        poss_lag = max(lag_dict.values())
+        if poss_lag > 0:
+            self.lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
+        else:
+            self.lag = 'notfound'
+        # TODO: erase below before publication
         with open('lag.txt', mode='w') as f:
             f.write('rank : lag (possibility)\n')
             poss_lag = 2
@@ -89,6 +90,4 @@ class WebSocketApp:
             wf.setsampwidth(2)
             wf.setframerate(info['framerate'])
             wf.writeframes(v.tobytes('C'))
-        with open('hoge.txt', mode='wb') as f:
-            f.write(v.tobytes('C'))
         print(self.lag)

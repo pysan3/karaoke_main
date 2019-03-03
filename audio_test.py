@@ -8,59 +8,46 @@ from audio import analyze
 import cProfile
 
 def main():
-    with open('hoge.wav', 'rb') as f:
-        data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    hsh, ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data[:1024*50*5]))
-    print(len(hsh))
-    with open('audio/wav/3.wav', 'rb') as f:
-        data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    usual_hsh_data, usual_ptime = tuple(list(map(int, l.split())) for l in backmusic.create_hash(data[:1024*50*5]))
-    print(len(usual_hsh_data))
-    lag_dict = {0:0}
-    for i in range(len(hsh)):
-        if hsh[i] in usual_hsh_data:
-            lag = ptime[i] - usual_ptime[usual_hsh_data.index(hsh[i])]
-            if lag in lag_dict.keys():
-                lag_dict[lag] += 1
-            else:
-                lag_dict[lag] = 1
-    print('rank : lag (possibility)')
-    poss_lag = 2
+    with open('lag.txt', 'r') as f:
+        lags = [(int(l.strip().split()[2]), int(l.strip().split()[3][1:-1])) for l in f.readlines()[1:]]
+    lag = lags[0][0] * lags[0][1]
+    count = lags[0][1]
     i = 1
-    while poss_lag != 1 and i < 10:
-        poss_lag = max(lag_dict.values())
-        usual_lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
-        print('   {0} : {1} ({2})'.format(i, usual_lag, poss_lag))
-        lag_dict.pop(usual_lag)
+    while abs(lags[i-1][0] - lags[i][0]) < 5:
+        lag += lags[i][0] * lags[i][1]
+        count += lags[i][1]
         i += 1
-
-def correlate():
-    with open('audio/wav/3.wav', 'rb') as f:
-        pre = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    plt.subplot(2, 1, 1)
-    plt.ylabel('pre')
-    plt.plot(pre)
+    lag /= count
+    print(lag, i)
+    x = np.arange(0, 256000 / 48000, 1.0 / 48000)
     with open('hoge.wav', 'rb') as f:
-        record = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
-    plt.subplot(2, 1, 2)
-    plt.ylabel('record')
-    plt.plot(record)
+        data = f.read()
+        hoge = np.frombuffer(data[44:], dtype='int16').astype(np.float32) / 32676
+        hoge = hoge[:256000]
+        plt.subplot(3, 1, 1)
+        plt.plot(x, hoge)
+    with open('audio/wav/8.wav', 'rb') as f:
+        data = np.frombuffer(f.read()[44:], dtype='int16').astype(np.float32) / 32676
+        data = data[:256000]
+        plt.subplot(3, 1, 2)
+        plt.plot(x, data)
+    test = hoge[round(lag*512/4):]
+    zero = np.zeros(256000)
+    delta = max(test) / max(data)
+    for i in range(len(test)):
+        zero[i] = test[i] - data[i] * delta * 0.6
+    plt.subplot(3, 1, 3)
+    plt.plot(x, zero)
+    with wave.Wave_write('lag_correction.wav') as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(48000)
+        w.writeframes((zero * 32676).astype(np.int16).tobytes('C'))
     plt.show()
-    pre = pre[:2000]
-    record = record[:2000]
-    if pre.mean():
-        print('pre not zero')
-        pre -= pre.mean()
-    if record.mean():
-        print('record ave not zero')
-        record -= record.mean()
-    corr = np.correlate(pre, record, 'full')
-    estimate_delay = corr.argmax() - len(record) + 1
-    print(estimate_delay)
+
 
 # pr = cProfile.Profile()
-# pr.runcall(correlate)
+# pr.runcall(main)
 # pr.print_stats()
 
-# correlate()
 main()
