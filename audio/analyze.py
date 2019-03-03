@@ -24,3 +24,12 @@ def peaks_to_landmarks(peaks_freq, peaks_time):
             list_hsh.append(hsh)
             list_ptime.append(ptime)
     return ' '.join(map(str, list_hsh)), ' '.join(map(str, list_ptime))
+
+# TODO: find places with no vocal
+# TODO: check whether user sing voice contains howling sounds
+#       (subtracted data is smaller than sent data <=> sound will become bigger if only contains raw env noise)
+# TODO: if yes: subtract original sound with suitable aspect
+# TODO: noise reduction using stft and spectral subtraction
+
+# TODO: get audio data without noise
+# TODO: evaluate users song
