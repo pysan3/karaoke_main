@@ -93,7 +93,7 @@ async def musiclist(req, resp):
 async def upload(req, resp):
     # TODO: return song_id if music already exists
     f_index = functions.index(sys._getframe().f_code.co_name)
-    data = cgi.FieldStorage(fp=io.BytesIO(await req.content), environ={'REQUEST_METHOD': 'POST'}, headers=req.headers).list
+    data = cgi.FieldStorage(fp=io.BytesIO(await req.content), environ={'REQUEST_METHOD':'POST'}, headers=req.headers).list
     # ['user_id', 'song_title', 'singer', 'file_type', 'data']
     song_id = backapp.add_music(data[1].value, data[2].value)
     if song_id != -1:
@@ -112,7 +112,7 @@ async def upload(req, resp):
 
 @api.route('/api/isUploaded/{song_id}')
 async def isUploaded(req, resp, *, song_id):
-    resp.media = {'isUploaded': backapp.finish_upload(song_id)}
+    resp.media = {'isUploaded':backapp.finish_upload(song_id)}
 
 @api.route('/audio/load_music/{req_id}')
 async def load_music(req, resp, *, req_id):
