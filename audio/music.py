@@ -73,7 +73,7 @@ class WebSocketApp:
             while poss_lag != 1 and i < 10:
                 poss_lag = max(lag_dict.values())
                 usual_lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
-                f.write('   {0} : {1} ({2})\n'.format(i, usual_lag, poss_lag))
+                f.write('   {0} : {1} ({2}) ... {3}\n'.format(i, usual_lag, poss_lag, self.counter))
                 lag_dict.pop(usual_lag)
                 i += 1
 

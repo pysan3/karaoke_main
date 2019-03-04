@@ -35,7 +35,7 @@ def main():
     zero = np.zeros(256000)
     delta = max(test) / max(data)
     for i in range(len(test)):
-        zero[i] = test[i] - data[i] * delta * 0.6
+        zero[i] = test[i] - data[i] * delta
     plt.subplot(3, 1, 3)
     plt.plot(x, zero)
     with wave.Wave_write('lag_correction.wav') as w:

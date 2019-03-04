@@ -133,8 +133,8 @@ async def load_music(req, resp, *, req_id):
 async def ws_sing(ws):
     f_index = functions.index(sys._getframe().f_code.co_name)
     @api.background.task
-    def lag_estimate(ws_handler):
-        ws_handler.lag_estimate()
+    def lag_estimate(handler):
+        handler.lag_estimate()
     await ws.accept()
     data = await ws.receive_json()
     ws_handler = backmusic.WebSocketApp(backapp.hashtable(data['song_id']))
