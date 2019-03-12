@@ -9,7 +9,7 @@ from audio import analyze
 
 import cProfile
 
-def main():
+def detect_lag_length():
     with open('lag.txt', 'r') as f:
         lags = [(int(l.strip().split()[2]), int(l.strip().split()[3][1:-1])) for l in f.readlines()[1:]]
     lag = lags[0][0] * lags[0][1]
@@ -69,6 +69,12 @@ def separate_whole_audio_data():
     write_wav('inst.wav', np.array(inst).flatten(), 16000, norm=True)
     print(time() - start)
 
+def backmusic_upload():
+    song_id = 100
+    ftype = 'wav'
+    with open('./audio/wav/fhana.wav', 'rb') as f:
+        data = f.read()
+    backmusic.upload(song_id, data, ftype)
 
 # pr = cProfile.Profile()
 # pr.runcall(main)
@@ -76,4 +82,6 @@ def separate_whole_audio_data():
 
 # main()
 
-separate_whole_audio_data()
+# separate_whole_audio_data()
+
+backmusic_upload()

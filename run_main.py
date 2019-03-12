@@ -7,6 +7,7 @@ import json
 import io
 import cgi
 from random import randint
+from time import sleep
 
 import apps.app as backapp
 import audio.music as backmusic
@@ -99,7 +100,12 @@ async def upload(req, resp):
     if song_id != -1:
         @api.background.task
         def music_upload(song_id, data, ftype):
-            h, t= backmusic.upload(song_id, data, ftype)
+            if not backmusic.upload(song_id, data, ftype):
+                logger.info('{0}@_@{1} {2} {3} {4}'.format(
+                    'music hash failed', f_index, 0, song_id, 0
+                ))
+                return
+            h, t = backmusic.upload_hash(song_id)
             backapp.upload_hash(song_id, h, t)
             logger.info('{0}@_@{1} {2} {3} {4}'.format(
                 'music hashed', f_index, 0, song_id, len(h.split())

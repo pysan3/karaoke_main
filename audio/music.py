@@ -20,21 +20,19 @@ def upload(song_id, data, ftype):
         f.write(data)
     tfm = sox.Transformer()
     tfm.set_output_format(file_type='wav', rate=16000, bits=16, channels=1)
-    tfm.build('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), './audio/wav/{0}.wav'.format(song_id))
-    while True:
-        try:
-            with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
-                data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*50*5]
-            break
-        except:
-            sleep(1)
-    os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
+    if tfm.build('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), './audio/wav/{0}.wav'.format(song_id)):
+        os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
+        return True
+    else:
+        return False
     # TODO: separate audio
     separate_audio('./audio/wav/{0}.wav'.format(song_id))
-    # TODO: find place for noise detection
-    # TODO: add to db
+    # TODO: find places for noise detection
+
+def upload_hash(song_id):
+    with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
+        data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*50*5]
     return create_hash(data.astype(np.float32) / 32676)
-    # => [(hsh, start_time), ...]
 
 def separate_audio(fname):
     unet = analyze.UNet()
