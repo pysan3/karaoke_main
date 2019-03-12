@@ -1,5 +1,5 @@
 import numpy as np
-from chainer import Chain, serializers, optimizers, config
+from chainer import Chain, serializers, config
 import chainer.links as L
 import chainer.functions as F
 from librosa.core import load, stft, istft

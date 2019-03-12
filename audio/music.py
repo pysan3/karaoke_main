@@ -6,7 +6,7 @@ from time import sleep
 from glob import glob
 import sox
 
-from audio import analyze, network
+from audio import analyze
 
 def load_music(song_id):
     if song_id in [s[12:-4] for s in glob('./audio/wav/*.wav')]:
@@ -19,7 +19,7 @@ def upload(song_id, data, ftype):
     with open('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), 'wb') as f:
         f.write(data)
     tfm = sox.Transformer()
-    tfm.set_output_format(file_type='wav', rate=48000, bits=16, channels=1)
+    tfm.set_output_format(file_type='wav', rate=16000, bits=16, channels=1)
     tfm.build('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), './audio/wav/{0}.wav'.format(song_id))
     while True:
         try:
@@ -29,8 +29,23 @@ def upload(song_id, data, ftype):
         except:
             sleep(1)
     os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
+    # TODO: separate audio
+    separate_audio('./audio/wav/{0}.wav'.format(song_id))
+    # TODO: find place for noise detection
+    # TODO: add to db
     return create_hash(data.astype(np.float32) / 32676)
     # => [(hsh, start_time), ...]
+
+def separate_audio(fname):
+    unet = analyze.UNet()
+    unet.load()
+    mag, phase = analyze.load_audio(fname)
+    vocal = []
+    inst = []
+    for i in range(0, len(mag), 1024):
+        mask = analyze.compute_mask(unet, mag[:, i:i+1024])
+        vocal.append(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
+        inst.append(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
 
 def create_hash(data):
     f, t = analyze.find_peaks(data)

@@ -1,6 +1,8 @@
 import numpy as np
+import scipy as sp
 import wave
 import matplotlib.pyplot as plt
+from time import time
 
 import audio.music as backmusic
 from audio import analyze
@@ -32,22 +34,46 @@ def main():
         plt.subplot(3, 1, 2)
         plt.plot(x, data)
     test = hoge[round(lag*512/4):]
-    zero = np.zeros(256000)
-    delta = max(test) / max(data)
-    for i in range(len(test)):
-        zero[i] = test[i] - data[i] * delta
+    zero = []
+    # check params
+    y = sp.signal.firwin(511, 0.9)
+    for i in range(0, len(test), 1024):
+        zero.append(data[i:i+1024:3])
+    zero = np.array(zero).flatten()
+    # zero = np.zeros(256000)
+    # delta = max(test) / max(data)
+    # for i in range(len(test)):
+    #     zero[i] = test[i] - data[i] * delta
     plt.subplot(3, 1, 3)
-    plt.plot(x, zero)
+    plt.plot(zero)
     with wave.Wave_write('lag_correction.wav') as w:
         w.setnchannels(1)
         w.setsampwidth(2)
-        w.setframerate(48000)
+        w.setframerate(16000)
         w.writeframes((zero * 32676).astype(np.int16).tobytes('C'))
     plt.show()
+
+def separate_whole_audio_data():
+    unet = analyze.UNet()
+    unet.load()
+    mag, phase = analyze.load_audio('audio/wav/8.wav')
+    vocal = []
+    inst = []
+    start = time()
+    for i in range(0, mag.shape[1]-1024, 1024):
+        mask = analyze.compute_mask(unet, mag[:, i:i+1024])
+        vocal.append(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
+        inst.append(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
+    from librosa.output import write_wav
+    write_wav('vocal.wav', np.array(vocal).flatten(), 16000, norm=True)
+    write_wav('inst.wav', np.array(inst).flatten(), 16000, norm=True)
+    print(time() - start)
 
 
 # pr = cProfile.Profile()
 # pr.runcall(main)
 # pr.print_stats()
 
-main()
+# main()
+
+separate_whole_audio_data()
