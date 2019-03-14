@@ -1,6 +1,5 @@
 import numpy as np
 import scipy as sp
-import scipy.ndimage as ndi
 from librosa.core import load, stft, istft
 from librosa.output import write_wav
 from chainer import Chain, serializers, config
@@ -34,6 +33,7 @@ class UNet(Chain):
             self.deconv5 = L.Deconvolution2D(64, 16, 4, 2, 1)
             self.denorm5 = L.BatchNormalization(16)
             self.deconv6 = L.Deconvolution2D(32, 1, 4, 2, 1)
+        serializers.load_npz('./audio/unet.model', self)
 
     def __call__(self, X):
         h1 = F.leaky_relu(self.norm1(self.conv1(X)))
@@ -50,16 +50,14 @@ class UNet(Chain):
         dh = F.sigmoid(self.deconv6(F.concat((dh, h1))))
         return dh
 
-    def load(self):
-        serializers.load_npz('./audio/unet.model', self)
-
 def load_audio(fname):
-    y, _ = load(fname, sr=16000)
+    y = load(fname, sr=16000)[0]
     spec = stft(y, n_fft=1024, hop_length=512, win_length=1024)
+    spec = np.pad(spec, [(0, 0), (0, 1024 - spec.shape[1] % 1024)], 'constant')
     mag = np.abs(spec)
     mag /= np.max(mag)
     phase = np.exp(1.j*np.angle(spec))
-    return mag, phase
+    return mag, phase, y.shape[0]
 
 def compute_mask(unet, input_mag):
     config.train = False
@@ -71,21 +69,10 @@ def compute_mask(unet, input_mag):
 def save_audio(mag, phase):
     return istft(mag * phase, hop_length=512, win_length=1024)
 
-def main():
-    folder = './wav/'
-    fname = 'original_mix.wav'
-    mag, phase = LoadAudio(folder + fname)
-    start = 1024
-    end = 1024+1024
-    mask = ComputeMask(mag[:, start:end], unet_model='unet.model')
-    SaveAudio(folder + 'vocal-%s' % fname, mag[:, start:end]*mask, phase[:, start:end])
-    SaveAudio(folder + 'inst-%s' % fname, mag[:, start:end]*(1-mask), phase[:, start:end])
-    SaveAudio(folder + 'orig-%s' % fname, mag[:, start:end], phase[:, start:end])
-
 def find_peaks(data):
     sgram = np.abs(stft(data, n_fft=512, window='hamming'))
-    neighborhood = ndi.morphology.iterate_structure(ndi.morphology.generate_binary_structure(2, 1), 8)
-    sgram_max = ndi.maximum_filter(sgram, footprint=neighborhood, mode='constant')
+    neighborhood = sp.ndimage.morphology.iterate_structure(sp.ndimage.morphology.generate_binary_structure(2, 1), 8)
+    sgram_max = sp.ndimage.maximum_filter(sgram, footprint=neighborhood, mode='constant')
     # => (peaks_freq, peaks_time)
     return np.asarray((sgram==sgram_max) & (sgram > 0.2)).nonzero()
 

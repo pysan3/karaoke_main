@@ -106,14 +106,14 @@ async def upload(req, resp):
                 ))
                 return
             h, t = backmusic.upload_hash(song_id)
-            backapp.upload_hash(song_id, h, t)
             logger.info('{0}@_@{1} {2} {3} {4}'.format(
                 'music hashed', f_index, 0, song_id, len(h.split())
             ))
-        music_upload(song_id, data[4].value, data[3].value)
+            backapp.upload_hash(song_id, h, t)
         logger.info('{0}@_@{1} {2} {3} {4}'.format(
             'music upload', f_index, data[0].value, song_id, 1
         ))
+        music_upload(song_id, data[4].value, data[3].value)
     resp.media = {'song_id':song_id}
 
 @api.route('/api/isUploaded/{song_id}')

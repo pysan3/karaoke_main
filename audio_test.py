@@ -55,18 +55,16 @@ def detect_lag_length():
 
 def separate_whole_audio_data():
     unet = analyze.UNet()
-    unet.load()
-    mag, phase = analyze.load_audio('audio/wav/8.wav')
-    vocal = []
-    inst = []
+    mag, phase, length = analyze.load_audio('audio/wav/fhana.wav')
+    data = [[], []]
     start = time()
-    for i in range(0, mag.shape[1]-1024, 1024):
+    for i in range(0, mag.shape[1], 1024):
         mask = analyze.compute_mask(unet, mag[:, i:i+1024])
-        vocal.append(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
-        inst.append(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
+        data[0].append(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
+        data[1].append(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
     from librosa.output import write_wav
-    write_wav('vocal.wav', np.array(vocal).flatten(), 16000, norm=True)
-    write_wav('inst.wav', np.array(inst).flatten(), 16000, norm=True)
+    for i in range(2):
+        write_wav('data{0}.wav'.format(i), np.array(data[i]).flatten()[:length], 16000, norm=True)
     print(time() - start)
 
 def backmusic_upload():
@@ -76,12 +74,10 @@ def backmusic_upload():
         data = f.read()
     backmusic.upload(song_id, data, ftype)
 
+# separate_whole_audio_data()
+# backmusic_upload()
+
+# main()
 # pr = cProfile.Profile()
 # pr.runcall(main)
 # pr.print_stats()
-
-# main()
-
-# separate_whole_audio_data()
-
-backmusic_upload()

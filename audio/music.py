@@ -9,8 +9,8 @@ import sox
 from audio import analyze
 
 def load_music(song_id):
-    if song_id in [s[12:-4] for s in glob('./audio/wav/*.wav')]:
-        with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
+    if song_id in [s[13:-4] for s in glob('./audio/inst/*.wav')]:
+        with open('./audio/inst/{0}.wav'.format(song_id), 'rb') as f:
             return f.read()
     else:
         return False
@@ -22,28 +22,27 @@ def upload(song_id, data, ftype):
     tfm.set_output_format(file_type='wav', rate=16000, bits=16, channels=1)
     if tfm.build('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), './audio/wav/{0}.wav'.format(song_id)):
         os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
+        separate_audio(song_id)
         return True
     else:
         return False
-    # TODO: separate audio
-    separate_audio('./audio/wav/{0}.wav'.format(song_id))
-    # TODO: find places for noise detection
 
 def upload_hash(song_id):
     with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*50*5]
     return create_hash(data.astype(np.float32) / 32676)
 
-def separate_audio(fname):
+def separate_audio(song_id):
     unet = analyze.UNet()
-    unet.load()
-    mag, phase = analyze.load_audio(fname)
+    mag, phase, length = analyze.load_audio('./audio/wav/{0}.wav'.format(song_id))
     vocal = []
     inst = []
-    for i in range(0, len(mag), 1024):
+    for i in range(0, mag.shape[1], 1024):
         mask = analyze.compute_mask(unet, mag[:, i:i+1024])
         vocal.append(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
         inst.append(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
+    analyze.write_wav('./audio/vocal/{0}.wav'.format(song_id), np.array(vocal).flatten()[:length], 16000, norm=True)
+    analyze.write_wav('./audio/inst/{0}.wav'.format(song_id), np.array(inst).flatten()[:length], 16000, norm=True)
 
 def create_hash(data):
     f, t = analyze.find_peaks(data)
@@ -54,7 +53,6 @@ class WebSocketApp:
     def __init__(self, tpl):
         self.data = []
         self.counter = 0
-        self.lag = 'notfound'
         self.hsh_data = [int(i) for i in tpl[0].split()]
         self.ptime = [int(i) for i in tpl[1].split()]
 
@@ -63,7 +61,6 @@ class WebSocketApp:
         self.counter += 1
 
     def lag_estimate(self):
-        self.lag = 'processing'
         hsh, ptime = tuple(list(map(int, l.split())) for l in create_hash(np.array(self.data).flatten()[:1024*50*5]))
         lag_dict = {0:0}
         for i in range(len(hsh)):
@@ -76,8 +73,9 @@ class WebSocketApp:
         poss_lag = max(lag_dict.values())
         if poss_lag > 0:
             self.lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
+            return True
         else:
-            self.lag = 'notfound'
+            return False
         # TODO: erase below before publication
         with open('lag.txt', mode='w') as f:
             f.write('rank : lag (possibility)\n')
