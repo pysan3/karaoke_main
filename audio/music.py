@@ -27,11 +27,6 @@ def upload(song_id, data, ftype):
     else:
         return False
 
-def upload_hash(song_id):
-    with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
-        data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*50*5]
-    return create_hash(data.astype(np.float32) / 32676)
-
 def separate_audio(song_id):
     unet = analyze.UNet()
     mag, phase, length = analyze.load_audio('./audio/wav/{0}.wav'.format(song_id))
@@ -44,6 +39,11 @@ def separate_audio(song_id):
     analyze.write_wav('./audio/vocal/{0}.wav'.format(song_id), np.array(vocal).flatten()[:length], 16000, norm=True)
     analyze.write_wav('./audio/inst/{0}.wav'.format(song_id), np.array(inst).flatten()[:length], 16000, norm=True)
 
+def upload_hash(song_id):
+    with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
+        data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*50*5]
+    return create_hash(data.astype(np.float32) / 32676)
+
 def create_hash(data):
     f, t = analyze.find_peaks(data)
     return analyze.peaks_to_landmarks(f, t)
@@ -53,6 +53,7 @@ class WebSocketApp:
     def __init__(self, tpl):
         self.data = []
         self.counter = 0
+        self.lag = 'unknown'
         self.hsh_data = [int(i) for i in tpl[0].split()]
         self.ptime = [int(i) for i in tpl[1].split()]
 
@@ -70,21 +71,22 @@ class WebSocketApp:
                     lag_dict[lag] += 1
                 else:
                     lag_dict[lag] = 1
-        poss_lag = max(lag_dict.values())
-        if poss_lag > 0:
-            self.lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
-            return True
-        else:
-            return False
+        if len(lag_dict) > 2:
+            poss_lag = sorted(lag_dict.values())[:3]
+            lag_data = [(k, v) for k, v in lag_dict.items() if v in poss_lag]
+            if np.array([l[0] for l in lag_data]).std() < 2:
+                # let error of max 4 diffs
+                self.lag = round(128 * sum([l[0] * l[1] for l in lag_data]) / sum(poss_lag))
         # TODO: erase below before publication
         with open('lag.txt', mode='w') as f:
-            f.write('rank : lag (possibility)\n')
+            f.write('final lag = {0}\n'.format(self.lag))
+            f.write('rank : lag (possibility) ... @{0}\n'.format(self.counter))
             poss_lag = 2
             i = 1
             while poss_lag != 1 and i < 10:
                 poss_lag = max(lag_dict.values())
                 usual_lag = [k for k, v in lag_dict.items() if v == poss_lag][0]
-                f.write('   {0} : {1} ({2}) ... {3}\n'.format(i, usual_lag, poss_lag, self.counter))
+                f.write('   {0} : {1} ({2})\n'.format(i, usual_lag, poss_lag))
                 lag_dict.pop(usual_lag)
                 i += 1
 
@@ -92,7 +94,10 @@ class WebSocketApp:
         return self.counter == 50 * 5
 
     def return_counter(self):
-        return self.counter, self.lag
+        return self.counter
+
+    def return_lag(self):
+        return self.lag
 
     def close(self, info):
         v = (np.array(self.data).flatten() * 32767).astype(np.int16)

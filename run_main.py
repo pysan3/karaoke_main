@@ -15,7 +15,7 @@ import audio.music as backmusic
 api = responder.API(templates_dir='./dist', static_dir='./dist/static')
 api.add_route(websocket=True)
 logger = backapp.create_logger(__name__)
-# logger.info(msg@_@event_id, user_id, push, result)
+# logger.info(msg@_@event_id, user_id, post, result)
 
 functions = [
     'index',
@@ -106,10 +106,10 @@ async def upload(req, resp):
                 ))
                 return
             h, t = backmusic.upload_hash(song_id)
+            backapp.upload_hash(song_id, h, t)
             logger.info('{0}@_@{1} {2} {3} {4}'.format(
                 'music hashed', f_index, 0, song_id, len(h.split())
             ))
-            backapp.upload_hash(song_id, h, t)
         logger.info('{0}@_@{1} {2} {3} {4}'.format(
             'music upload', f_index, data[0].value, song_id, 1
         ))
@@ -153,7 +153,7 @@ async def ws_sing(ws):
             ws_handler.close(data)
             break
     logger.info('{0}@_@{1} {2} {3} {4}'.format(
-        'ws connection completed', f_index, data['user_id'], ws_handler.return_counter()[0], 1
+        'ws connection completed', f_index, data['user_id'], ws_handler.return_counter(), 1
     ))
 
 @api.route('/api/random')

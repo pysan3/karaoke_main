@@ -11,7 +11,7 @@ import cProfile
 
 def detect_lag_length():
     with open('lag.txt', 'r') as f:
-        lags = [(int(l.strip().split()[2]), int(l.strip().split()[3][1:-1])) for l in f.readlines()[1:]]
+        lags = [(int(l.strip().split()[2]), int(l.strip().split()[3][1:-1])) for l in f.readlines()[2:]]
     lag = lags[0][0] * lags[0][1]
     count = lags[0][1]
     i = 1
