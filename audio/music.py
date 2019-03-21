@@ -19,7 +19,7 @@ def upload(song_id, data, ftype):
     with open('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), 'wb') as f:
         f.write(data)
     tfm = sox.Transformer()
-    tfm.set_output_format(file_type='wav', rate=16000, bits=16, channels=1)
+    tfm.set_output_format(file_type='wav', rate=48000, bits=16, channels=1)
     if tfm.build('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype), './audio/wav/{0}.wav'.format(song_id)):
         os.remove('./audio/wav/tmp_{0}.{1}'.format(song_id, ftype))
         separate_audio(song_id)
@@ -62,8 +62,6 @@ class WebSocketApp:
         self.counter[0] += 1
 
     def lag_estimate(self):
-        with open('lag.txt', 'w') as f:
-            f.write(str(self.counter[0]) + '\n')
         hsh, ptime = tuple(list(map(int, l.split())) for l in create_hash(np.array(self.data[:1024*250])))
         lag_dict = {0:0}
         for i in range(len(hsh)):
@@ -74,15 +72,18 @@ class WebSocketApp:
                 else:
                     lag_dict[lag] = 1
         self.lag = True
-        if len(lag_dict) > 2:
-            poss_lag = sorted(lag_dict.values())[:3]
+        if len(lag_dict) >= 5:
+            poss_lag = sorted(lag_dict.values(), reverse=True)[:5]
+            for i in range(4, 1, -1):
+                if poss_lag[i] * 3 < poss_lag[i-1] or poss_lag[i] == 1:
+                    poss_lag = poss_lag[:i]
             lag_data = [(k, v) for k, v in lag_dict.items() if v in poss_lag]
             if np.array([l[0] for l in lag_data]).std() < 2:
                 # let error of max 4 diffs
                 self.lag = round(128 * sum([l[0] * l[1] for l in lag_data]) / sum(poss_lag))
         # TODO: erase below before publication
         with open('lag.txt', 'a') as f:
-            f.write('final lag = {0}\n'.format(self.lag))
+            f.write('final lag = {0} ({1}), std = {2}\n'.format(self.lag, self.lag / 128, np.array([l[0] for l in lag_data]).std()))
             f.write('rank : lag (possibility) ... @{0}\n'.format(self.counter))
             poss_lag = 2
             i = 1
@@ -102,25 +103,19 @@ class WebSocketApp:
             end = start + 1024
             if start < 0:
                 l = [0 for i in range(-self.lag)] + self.data[0:end]
-            elif end > (abs(self.counter[0]) + 1) * 1024:
-                l = self.data[start:] + [0 for i in range(self.lag)]
             else:
                 l = self.data[start:end]
-            sleep(1)
             # make list of len 1024 to nr
             # self._sub(list) <- analyze? func for reduce noise ([audio data, 1024] -> [audio data, 1024])
             self.counter[1] += 1
-
-    def _sub(self):
-        pass
 
     def return_counter(self):
         return abs(self.counter[0])
 
     def close(self, info):
-        self.counter[0] *= -1
         if self.lag > 0:
             self.data.extend([0 for i in range(self.lag)])
+        self.counter[0] *= -1
         v = (np.array(self.data) * 32767).astype(np.int16)
         with wave.Wave_write('hoge.wav') as wf:
             wf.setnchannels(1)

@@ -15,6 +15,7 @@
     <input type="text" placeholder="file type" v-model="file_type">
     <button id="btn" @click="upload">upload music</button>
     <br>
+    <h1 v-if="uploading === 1">uploading ...</h1>
   </div>
 </template>
 
@@ -27,7 +28,8 @@ export default {
       song_title: 'hoge',
       singer: 'fhana',
       file_type: '',
-      uploadFile: null
+      uploadFile: null,
+      uploading: 0
     }
   },
   computed: mapState([
@@ -53,6 +55,7 @@ export default {
         alert('name should be longer than one letter')
         return
       }
+      this.uploading = 1
       const formData = new FormData()
       formData.append('user_id', this.user_id)
       formData.append('song_title', this.song_title)

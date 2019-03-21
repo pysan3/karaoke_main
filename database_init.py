@@ -7,6 +7,7 @@ from apps.database import Base, engine, Session, Eventnames
 
 def create_new_database():
     audio_list = glob('./audio/wav/[0-9]*.wav')
+    print(audio_list)
     for audio in audio_list:
         os.remove(audio)
     Base.metadata.drop_all(engine)
