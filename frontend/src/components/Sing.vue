@@ -1,6 +1,7 @@
 <template>
   <div>
     <button id='btn'>press here</button>
+    <h2 v-if="isReady === 1">ready</h2>
   </div>
 </template>
 
@@ -9,7 +10,8 @@ import { mapState } from 'vuex'
 export default {
   data () {
     return {
-      song_id: this.$route.params.song_id
+      song_id: this.$route.params.song_id,
+      isReady: 0
     }
   },
   computed: mapState([
@@ -43,6 +45,7 @@ export default {
                 })
               }
             }
+            vm.isReady = 1
           } else if (request.status === 500) {
             request = null
             alert('error occured')

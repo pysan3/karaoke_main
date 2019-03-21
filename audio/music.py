@@ -9,7 +9,7 @@ import sox
 from audio import analyze
 
 def load_music(song_id):
-    if song_id in [s[13:-4] for s in glob('./audio/wav/*.wav')]:
+    if song_id in [s[12:-4] for s in glob('./audio/wav/*.wav')]:
         with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
             return f.read()
     else:
@@ -102,10 +102,11 @@ class WebSocketApp:
             end = start + 1024
             if start < 0:
                 l = [0 for i in range(-self.lag)] + self.data[0:end]
-            elif end > len(self.data):
+            elif end > (abs(self.counter[0]) + 1) * 1024:
                 l = self.data[start:] + [0 for i in range(self.lag)]
             else:
                 l = self.data[start:end]
+            sleep(1)
             # make list of len 1024 to nr
             # self._sub(list) <- analyze? func for reduce noise ([audio data, 1024] -> [audio data, 1024])
             self.counter[1] += 1
