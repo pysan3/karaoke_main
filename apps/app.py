@@ -80,13 +80,14 @@ def add_music(name, singer):
     session.close()
     return song_id
 
-def upload_hash(song_id, h, t):
+def upload_hash(song_id, h, t, n):
     # TODO: format table?
     session = Session()
     session.add(Hsh(
         song_id=song_id,
         hsh_data=h,
-        ptime=t
+        ptime=t,
+        noise=n
     ))
     session.commit()
     session.close()
@@ -95,7 +96,7 @@ def hashtable(song_id):
     session = Session()
     hsh = session.query(Hsh).filter_by(song_id=song_id).one()
     session.close()
-    return hsh.hsh_data, hsh.ptime
+    return hsh.hsh_data, hsh.ptime, hsh.noise
 
 def finish_upload(song_id):
     session = Session()

@@ -40,9 +40,13 @@ def separate_audio(song_id):
     analyze.write_wav('./audio/inst/{0}.wav'.format(song_id), np.array(inst[:length]), 16000, norm=True)
 
 def upload_hash(song_id):
+    with open('./audio/vocal/{0}.wav'.format(song_id), 'rb') as f:
+        vocal = np.frombuffer(f.read()[44:], dtype='int16')
+    # TODO: get silent part from vocal data -> noise_time
+    noise_time = 1
     with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
         data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*250]
-    return create_hash(data.astype(np.float32) / 32676)
+    return create_hash(data.astype(np.float32) / 32676) + (noise_time,)
 
 def create_hash(data):
     f, t = analyze.find_peaks(data)
@@ -56,6 +60,7 @@ class WebSocketApp:
         self.lag = False
         self.hsh_data = [int(i) for i in tpl[0].split()]
         self.ptime = [int(i) for i in tpl[1].split()]
+        self.noise = tpl[2]
 
     def upload(self, stream):
         self.data.extend(np.frombuffer(stream, dtype='float32'))
@@ -95,6 +100,7 @@ class WebSocketApp:
                 i += 1
 
     def noise_reduction(self):
+        # get noise spectrum
         while self.counter[0] != -self.counter[1]:
             if self.counter[0] == self.counter[1]:
                 sleep(1)

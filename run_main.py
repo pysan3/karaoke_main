@@ -105,8 +105,8 @@ async def upload(req, resp):
                     'music hash failed', f_index, 0, song_id, 0
                 ))
                 return
-            h, t = backmusic.upload_hash(song_id)
-            backapp.upload_hash(song_id, h, t)
+            h, t, n = backmusic.upload_hash(song_id)
+            backapp.upload_hash(song_id, h, t, n)
             logger.info('{0}@_@{1} {2} {3} {4}'.format(
                 'music hashed', f_index, 0, song_id, len(h.split())
             ))
