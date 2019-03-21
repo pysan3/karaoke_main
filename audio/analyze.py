@@ -95,6 +95,7 @@ def peaks_to_landmarks(peaks_freq, peaks_time):
 def downsampling(data, y):
     data = sp.signal.lfilter(y, 1, data)
     return data[0::3]
+
 # TODO: find places with no vocal
 # TODO: check whether user sing voice contains howling sounds
 #       (subtracted data is smaller than sent data <=> sound will become bigger if only contains raw env noise)

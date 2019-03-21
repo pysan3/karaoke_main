@@ -141,13 +141,14 @@ async def ws_sing(ws):
     @api.background.task
     def lag_estimate(handler):
         handler.lag_estimate()
+        handler.noise_reduction()
     await ws.accept()
     data = await ws.receive_json()
     ws_handler = backmusic.WebSocketApp(backapp.hashtable(data['song_id']))
     while True:
         try:
             ws_handler.upload(await ws.receive_bytes())
-            if ws_handler.check_lag():
+            if ws_handler.counter[0] == 50 * 5:
                 lag_estimate(ws_handler)
         except:
             ws_handler.close(data)

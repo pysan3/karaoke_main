@@ -60,11 +60,11 @@ def separate_whole_audio_data():
     start = time()
     for i in range(0, mag.shape[1], 1024):
         mask = analyze.compute_mask(unet, mag[:, i:i+1024])
-        data[0].append(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
-        data[1].append(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
+        data[0].extend(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
+        data[1].extend(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
     from librosa.output import write_wav
     for i in range(2):
-        write_wav('data{0}.wav'.format(i), np.array(data[i]).flatten()[:length], 16000, norm=True)
+        write_wav('data{0}.wav'.format(i), np.array(data[i][:length]), 16000, norm=True)
     print(time() - start)
 
 def backmusic_upload():
@@ -74,8 +74,12 @@ def backmusic_upload():
         data = f.read()
     backmusic.upload(song_id, data, ftype)
 
+def noise_reduction():
+    pass
+
 # separate_whole_audio_data()
 # backmusic_upload()
+noise_reduction()
 
 # main()
 # pr = cProfile.Profile()

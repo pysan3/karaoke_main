@@ -9,8 +9,8 @@ import sox
 from audio import analyze
 
 def load_music(song_id):
-    if song_id in [s[13:-4] for s in glob('./audio/inst/*.wav')]:
-        with open('./audio/inst/{0}.wav'.format(song_id), 'rb') as f:
+    if song_id in [s[13:-4] for s in glob('./audio/wav/*.wav')]:
+        with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
             return f.read()
     else:
         return False
@@ -34,14 +34,14 @@ def separate_audio(song_id):
     inst = []
     for i in range(0, mag.shape[1], 1024):
         mask = analyze.compute_mask(unet, mag[:, i:i+1024])
-        vocal.append(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
-        inst.append(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
-    analyze.write_wav('./audio/vocal/{0}.wav'.format(song_id), np.array(vocal).flatten()[:length], 16000, norm=True)
-    analyze.write_wav('./audio/inst/{0}.wav'.format(song_id), np.array(inst).flatten()[:length], 16000, norm=True)
+        vocal.extend(analyze.save_audio(mag[:, i:i+1024]*mask, phase[:, i:i+1024]))
+        inst.extend(analyze.save_audio(mag[:, i:i+1024]*(1-mask), phase[:, i:i+1024]))
+    analyze.write_wav('./audio/vocal/{0}.wav'.format(song_id), np.array(vocal[:length]), 16000, norm=True)
+    analyze.write_wav('./audio/inst/{0}.wav'.format(song_id), np.array(inst[:length]), 16000, norm=True)
 
 def upload_hash(song_id):
     with open('./audio/wav/{0}.wav'.format(song_id), 'rb') as f:
-        data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*50*5]
+        data = np.frombuffer(f.read()[44:], dtype='int16')[:1024*250]
     return create_hash(data.astype(np.float32) / 32676)
 
 def create_hash(data):
@@ -52,17 +52,19 @@ def create_hash(data):
 class WebSocketApp:
     def __init__(self, tpl):
         self.data = []
-        self.counter = 0
-        self.lag = 'unknown'
+        self.counter = [0, 0]
+        self.lag = False
         self.hsh_data = [int(i) for i in tpl[0].split()]
         self.ptime = [int(i) for i in tpl[1].split()]
 
     def upload(self, stream):
-        self.data.append(np.frombuffer(stream, dtype='float32'))
-        self.counter += 1
+        self.data.extend(np.frombuffer(stream, dtype='float32'))
+        self.counter[0] += 1
 
     def lag_estimate(self):
-        hsh, ptime = tuple(list(map(int, l.split())) for l in create_hash(np.array(self.data).flatten()[:1024*50*5]))
+        with open('lag.txt', 'w') as f:
+            f.write(str(self.counter[0]) + '\n')
+        hsh, ptime = tuple(list(map(int, l.split())) for l in create_hash(np.array(self.data[:1024*250])))
         lag_dict = {0:0}
         for i in range(len(hsh)):
             if hsh[i] in self.hsh_data:
@@ -71,6 +73,7 @@ class WebSocketApp:
                     lag_dict[lag] += 1
                 else:
                     lag_dict[lag] = 1
+        self.lag = True
         if len(lag_dict) > 2:
             poss_lag = sorted(lag_dict.values())[:3]
             lag_data = [(k, v) for k, v in lag_dict.items() if v in poss_lag]
@@ -78,7 +81,7 @@ class WebSocketApp:
                 # let error of max 4 diffs
                 self.lag = round(128 * sum([l[0] * l[1] for l in lag_data]) / sum(poss_lag))
         # TODO: erase below before publication
-        with open('lag.txt', mode='w') as f:
+        with open('lag.txt', 'a') as f:
             f.write('final lag = {0}\n'.format(self.lag))
             f.write('rank : lag (possibility) ... @{0}\n'.format(self.counter))
             poss_lag = 2
@@ -90,17 +93,34 @@ class WebSocketApp:
                 lag_dict.pop(usual_lag)
                 i += 1
 
-    def check_lag(self):
-        return self.counter == 50 * 5
+    def noise_reduction(self):
+        while self.counter[0] != -self.counter[1]:
+            if self.counter[0] == self.counter[1]:
+                sleep(1)
+                continue
+            start = 1024 * self.counter[1] + self.lag
+            end = start + 1024
+            if start < 0:
+                l = [0 for i in range(-self.lag)] + self.data[0:end]
+            elif end > len(self.data):
+                l = self.data[start:] + [0 for i in range(self.lag)]
+            else:
+                l = self.data[start:end]
+            # make list of len 1024 to nr
+            # self._sub(list) <- analyze? func for reduce noise ([audio data, 1024] -> [audio data, 1024])
+            self.counter[1] += 1
+
+    def _sub(self):
+        pass
 
     def return_counter(self):
-        return self.counter
-
-    def return_lag(self):
-        return self.lag
+        return abs(self.counter[0])
 
     def close(self, info):
-        v = (np.array(self.data).flatten() * 32767).astype(np.int16)
+        self.counter[0] *= -1
+        if self.lag > 0:
+            self.data.extend([0 for i in range(self.lag)])
+        v = (np.array(self.data) * 32767).astype(np.int16)
         with wave.Wave_write('hoge.wav') as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
