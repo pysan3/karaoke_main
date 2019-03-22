@@ -32,7 +32,6 @@ scipy
 sox
 SQLAlchemy
 starlette
-tensorflow
 urllib3
 websockets
 xlrd
