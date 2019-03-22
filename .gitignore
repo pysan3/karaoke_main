@@ -1,3 +1,4 @@
 apps/database.sqlite3
 .vscode
 __pycache__/
+*.wav
