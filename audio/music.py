@@ -53,9 +53,6 @@ def create_hash(data):
     return analyze.peaks_to_landmarks(f, t)
     # => list_hsh, list_ptime (both in str)
 
-def hoge():
-    pass
-
 class WebSocketApp:
     def __init__(self, tpl):
         self.data = []
