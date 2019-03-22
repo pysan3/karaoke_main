@@ -77,9 +77,9 @@ class WebSocketApp:
                 else:
                     lag_dict[lag] = 1
         self.lag = True
-        if len(lag_dict) >= 5:
-            poss_lag = sorted(lag_dict.values(), reverse=True)[:5]
-            for i in range(4, 1, -1):
+        if len(lag_dict) >= 3:
+            poss_lag = sorted(lag_dict.values(), reverse=True)[:3]
+            for i in range(2, 1, -1):
                 if poss_lag[i] * 3 < poss_lag[i-1] or poss_lag[i] == 1:
                     poss_lag = poss_lag[:i]
             lag_data = [(k, v) for k, v in lag_dict.items() if v in poss_lag]
@@ -87,7 +87,7 @@ class WebSocketApp:
                 # let error of max 4 diffs
                 self.lag = round(128 * sum([l[0] * l[1] for l in lag_data]) / sum(poss_lag))
         # TODO: erase below before publication
-        with open('lag.txt', 'a') as f:
+        with open('lag.txt', 'w') as f:
             f.write('final lag = {0} ({1}), std = {2}\n'.format(self.lag, self.lag / 128, np.array([l[0] for l in lag_data]).std()))
             f.write('rank : lag (possibility) ... @{0}\n'.format(self.counter))
             poss_lag = 2

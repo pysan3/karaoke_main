@@ -1,4 +1,3 @@
-database.sqlite3
+apps/database.sqlite3
 .vscode
-__pyache__
-00test.py
+__pycache__/
